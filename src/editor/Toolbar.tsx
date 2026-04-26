@@ -22,8 +22,8 @@ import { createPortal } from 'react-dom';
 import { exportDeckHtml, downloadFile } from '@/export/exportHtml';
 import { exportDeckPdf } from '@/export/exportPdf';
 import { exportDeckMd } from '@/export/exportMd';
-import { downloadAgentGuide } from '@/export/agentGuide';
-import { BookOpen } from 'lucide-react';
+import { copyAgentGuide } from '@/export/agentGuide';
+import { BookOpen, Check } from 'lucide-react';
 import { newDeckId } from '@/storage/deckStore';
 import { DEFAULT_MARKDOWN } from '@/state/useDeckStore';
 
@@ -50,6 +50,7 @@ export function Toolbar({ onOpenAudience, audienceConnected }: Props) {
 
   const [busy, setBusy] = useState(false);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const [guideCopied, setGuideCopied] = useState(false);
   const [exportAnchor, setExportAnchor] = useState<DOMRect | null>(null);
   const exportTriggerRef = useRef<HTMLButtonElement | null>(null);
   const exportMenuRef = useRef<HTMLDivElement | null>(null);
@@ -252,14 +253,19 @@ export function Toolbar({ onOpenAudience, audienceConnected }: Props) {
             </button>
             <div className="my-1 h-px bg-chrome-border" />
             <button
-              onClick={() => {
-                downloadAgentGuide();
+              onClick={async () => {
+                const ok = await copyAgentGuide();
+                if (ok) {
+                  setGuideCopied(true);
+                  setTimeout(() => setGuideCopied(false), 1800);
+                }
                 setExportMenuOpen(false);
               }}
               className="w-full text-left px-2 py-1.5 text-xs text-chrome-fg hover:bg-[#1d1d24] rounded inline-flex items-center gap-2"
-              title="Download a complete reference an LLM agent can paste into context to author decks for this tool"
+              title="Copy the agent guide to clipboard — paste it into Claude/GPT context to author decks for this tool"
             >
-              <BookOpen size={12} /> Guide for agent (.md)
+              {guideCopied ? <Check size={12} /> : <BookOpen size={12} />}
+              {guideCopied ? 'Copied!' : 'Copy agent guide'}
             </button>
           </div>,
           document.body,

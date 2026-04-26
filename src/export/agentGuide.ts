@@ -541,14 +541,23 @@ Output the markdown only. No surrounding prose, no code fence around
 the whole document — the user will paste it directly into the editor.
 `;
 
-export function downloadAgentGuide() {
-  const blob = new Blob([AGENT_GUIDE], { type: 'text/markdown' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'md-presentations-agent-guide.md';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+export async function copyAgentGuide(): Promise<boolean> {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(AGENT_GUIDE);
+      return true;
+    }
+    // Fallback for older / restricted contexts
+    const ta = document.createElement('textarea');
+    ta.value = AGENT_GUIDE;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    ta.remove();
+    return ok;
+  } catch {
+    return false;
+  }
 }
