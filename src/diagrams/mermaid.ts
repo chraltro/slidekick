@@ -33,9 +33,23 @@ function hash(s: string): string {
 export async function renderMermaid(root: HTMLElement): Promise<void> {
   const blocks = Array.from(root.querySelectorAll<HTMLElement>('.mermaid:not([data-processed])'));
   if (blocks.length === 0) return;
-  const mermaid = await loadMermaid();
+  let mermaid: MermaidApi;
+  try {
+    mermaid = await loadMermaid();
+  } catch (e) {
+    console.error('[mermaid] failed to load library', e);
+    for (const b of blocks) {
+      b.innerHTML = `<pre style="color:#f87171;font-size:1rem">mermaid library failed to load: ${(e as Error).message}</pre>`;
+      b.dataset.processed = '1';
+    }
+    return;
+  }
   for (const block of blocks) {
-    const code = block.textContent ?? '';
+    const code = (block.textContent ?? '').trim();
+    if (!code) {
+      block.dataset.processed = '1';
+      continue;
+    }
     const key = hash(code);
     let svg = cache.get(key);
     if (!svg) {
@@ -44,7 +58,8 @@ export async function renderMermaid(root: HTMLElement): Promise<void> {
         svg = result.svg;
         cache.set(key, svg);
       } catch (e) {
-        svg = `<pre style="color:#f87171">Mermaid error: ${(e as Error).message}</pre>`;
+        console.error('[mermaid] render failed for code:', code, e);
+        svg = `<pre style="color:#f87171;font-size:1rem;padding:1rem;background:rgba(248,113,113,0.1);border-radius:0.5rem">Mermaid error: ${(e as Error).message}\n\nSource:\n${code.replace(/[<>]/g, (c) => (c === '<' ? '&lt;' : '&gt;'))}</pre>`;
       }
     }
     block.innerHTML = svg;

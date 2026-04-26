@@ -18,6 +18,14 @@
   height: 1em;
   display: block;
 }
+.slide-canvas .lucide-missing {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.4;
+}
 
 /* ---------- Callouts ---------- */
 .slide-canvas .callout {
@@ -199,23 +207,28 @@
 }
 
 /* ---------- Timeline ----------
-   :::timeline
-   - **2020** — Started building
-   - **2024** — Launched
-   :::
+   Layout uses CSS variables so dot/line stay aligned regardless of font-size.
+   - --tl-pad: how far list items are indented from the left
+   - --tl-line: x-position of the vertical line (centre)
+   - --tl-line-w: line thickness
+   - --tl-dot: dot diameter
 */
 .slide-canvas .infographic-timeline {
+  --tl-pad: 3rem;
+  --tl-line: 1rem;
+  --tl-line-w: 2px;
+  --tl-dot: 0.85rem;
   position: relative;
   margin: 0.8em 0;
-  padding-left: 2.5rem;
+  padding-left: var(--tl-pad);
 }
 .slide-canvas .infographic-timeline::before {
   content: '';
   position: absolute;
-  left: 0.7rem;
+  left: calc(var(--tl-line) - (var(--tl-line-w) / 2));
   top: 0.4rem;
   bottom: 0.4rem;
-  width: 2px;
+  width: var(--tl-line-w);
   background: var(--accent, currentColor);
   opacity: 0.4;
 }
@@ -237,10 +250,14 @@
 .slide-canvas .infographic-timeline li::before {
   content: '';
   position: absolute;
-  left: -2.45rem;
+  /* Centre the dot horizontally on the vertical line:
+     line centre is at `var(--tl-line)` from container left.
+     li starts at `var(--tl-pad)` from container left.
+     dot's left (relative to li) = line_centre - pad - dot/2 */
+  left: calc(var(--tl-line) - var(--tl-pad) - (var(--tl-dot) / 2));
   top: 0.55em;
-  width: 0.85rem;
-  height: 0.85rem;
+  width: var(--tl-dot);
+  height: var(--tl-dot);
   border-radius: 50%;
   background: var(--accent, currentColor);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent, currentColor) 25%, transparent);

@@ -164,8 +164,8 @@ fills the rest of the slide.
 
 **quote** — \`# Heading\` (optional) then a blockquote. Each \`>\` line
 renders as its own line on the slide (line breaks are preserved). For
-attribution, either start the last line with \`--\`, \`~\`, or use a
-metadata comment:
+attribution, start the last line with \`--\`, \`~\`, \`by \`, or use a
+metadata comment.
 
 \`\`\`md
 # Optional title
@@ -176,6 +176,19 @@ metadata comment:
 # Or with metadata
 <!-- attribution: Author Name -->
 > The actual quote.
+\`\`\`
+
+**Quote without a header** — a slide doesn't have to start with \`#\`. Use
+\`***\` on its own line as a slide separator and write the blockquote as
+the entire slide:
+
+\`\`\`md
+# Some preceding slide
+
+***
+
+> A quote that stands alone, with no slide title.
+> -- Author
 \`\`\`
 
 If there's prose after the blockquote on the same slide, it renders

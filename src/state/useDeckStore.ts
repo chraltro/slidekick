@@ -230,6 +230,12 @@ Autosave is on by default. Your work is in IndexedDB.
 
 This is the wedge. Everything else is supporting infrastructure for this single moment of feedback.
 
+***
+
+> A quote slide without a header. Use \`***\` on its own line to start a new slide without an H1.
+>
+> -- Anonymous
+
 # Images
 
 ![A scenic mountain photo](https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80)
