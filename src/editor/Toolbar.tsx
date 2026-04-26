@@ -17,7 +17,8 @@ import {
   Sliders,
   FileDown,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { exportDeckHtml, downloadFile } from '@/export/exportHtml';
 import { exportDeckPdf } from '@/export/exportPdf';
 import { exportDeckMd } from '@/export/exportMd';
@@ -49,6 +50,40 @@ export function Toolbar({ onOpenAudience, audienceConnected }: Props) {
 
   const [busy, setBusy] = useState(false);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const [exportAnchor, setExportAnchor] = useState<DOMRect | null>(null);
+  const exportTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const exportMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useLayoutEffect(() => {
+    if (!exportMenuOpen) return;
+    const update = () => setExportAnchor(exportTriggerRef.current?.getBoundingClientRect() ?? null);
+    update();
+    window.addEventListener('resize', update);
+    window.addEventListener('scroll', update, true);
+    return () => {
+      window.removeEventListener('resize', update);
+      window.removeEventListener('scroll', update, true);
+    };
+  }, [exportMenuOpen]);
+
+  useEffect(() => {
+    if (!exportMenuOpen) return;
+    function onDocClick(e: MouseEvent) {
+      const t = e.target as Node;
+      if (exportMenuRef.current?.contains(t)) return;
+      if (exportTriggerRef.current?.contains(t)) return;
+      setExportMenuOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setExportMenuOpen(false);
+    }
+    document.addEventListener('mousedown', onDocClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDocClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [exportMenuOpen]);
 
   function handleExportHtml() {
     setBusy(true);
@@ -173,55 +208,62 @@ export function Toolbar({ onOpenAudience, audienceConnected }: Props) {
           <Play size={14} />
           <span>{isPresenting ? 'Stop' : 'Present'}</span>
         </Button>
-        <div className="relative">
-          <Button
-            onClick={() => setExportMenuOpen((v) => !v)}
-            variant="default"
-            size="sm"
-            disabled={busy}
-            title="Export…"
-          >
-            <Download size={14} />
-            <span>{busy ? 'Exporting…' : 'Export'}</span>
-          </Button>
-          {exportMenuOpen && (
-            <div
-              className="absolute right-0 mt-2 w-44 bg-chrome-surface border border-chrome-border rounded-md shadow-2xl z-50 p-1"
-              onMouseLeave={() => setExportMenuOpen(false)}
-            >
-              <button
-                onClick={handleExportHtml}
-                className="w-full text-left px-2 py-1.5 text-xs text-chrome-fg hover:bg-[#1d1d24] rounded inline-flex items-center gap-2"
-              >
-                <FileText size={12} /> HTML (self-contained)
-              </button>
-              <button
-                onClick={handleExportPdf}
-                className="w-full text-left px-2 py-1.5 text-xs text-chrome-fg hover:bg-[#1d1d24] rounded inline-flex items-center gap-2"
-              >
-                <FileDown size={12} /> PDF (via print)
-              </button>
-              <button
-                onClick={handleExportMd}
-                className="w-full text-left px-2 py-1.5 text-xs text-chrome-fg hover:bg-[#1d1d24] rounded inline-flex items-center gap-2"
-              >
-                <Save size={12} /> Markdown source (.md)
-              </button>
-              <div className="my-1 h-px bg-chrome-border" />
-              <button
-                onClick={() => {
-                  downloadAgentGuide();
-                  setExportMenuOpen(false);
-                }}
-                className="w-full text-left px-2 py-1.5 text-xs text-chrome-fg hover:bg-[#1d1d24] rounded inline-flex items-center gap-2"
-                title="Download a complete reference an LLM agent can paste into context to author decks for this tool"
-              >
-                <BookOpen size={12} /> Guide for agent (.md)
-              </button>
-            </div>
-          )}
-        </div>
+        <Button
+          ref={exportTriggerRef}
+          onClick={() => setExportMenuOpen((v) => !v)}
+          variant="default"
+          size="sm"
+          disabled={busy}
+          title="Export…"
+        >
+          <Download size={14} />
+          <span>{busy ? 'Exporting…' : 'Export'}</span>
+        </Button>
       </div>
+      {exportMenuOpen && exportAnchor &&
+        createPortal(
+          <div
+            ref={exportMenuRef}
+            className="fixed bg-chrome-surface border border-chrome-border rounded-md shadow-2xl p-1"
+            style={{
+              top: exportAnchor.bottom + 8,
+              left: Math.max(8, Math.min(window.innerWidth - 232, exportAnchor.right - 224)),
+              width: 224,
+              zIndex: 1000,
+            }}
+          >
+            <button
+              onClick={handleExportHtml}
+              className="w-full text-left px-2 py-1.5 text-xs text-chrome-fg hover:bg-[#1d1d24] rounded inline-flex items-center gap-2"
+            >
+              <FileText size={12} /> HTML (self-contained)
+            </button>
+            <button
+              onClick={handleExportPdf}
+              className="w-full text-left px-2 py-1.5 text-xs text-chrome-fg hover:bg-[#1d1d24] rounded inline-flex items-center gap-2"
+            >
+              <FileDown size={12} /> PDF (via print)
+            </button>
+            <button
+              onClick={handleExportMd}
+              className="w-full text-left px-2 py-1.5 text-xs text-chrome-fg hover:bg-[#1d1d24] rounded inline-flex items-center gap-2"
+            >
+              <Save size={12} /> Markdown source (.md)
+            </button>
+            <div className="my-1 h-px bg-chrome-border" />
+            <button
+              onClick={() => {
+                downloadAgentGuide();
+                setExportMenuOpen(false);
+              }}
+              className="w-full text-left px-2 py-1.5 text-xs text-chrome-fg hover:bg-[#1d1d24] rounded inline-flex items-center gap-2"
+              title="Download a complete reference an LLM agent can paste into context to author decks for this tool"
+            >
+              <BookOpen size={12} /> Guide for agent (.md)
+            </button>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
