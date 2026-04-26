@@ -1,0 +1,44 @@
+/* One Dark — Atom-style classic */
+.theme-one-dark {
+  /* surfaces */
+  --bg:           #282c34;
+  --bg-alt:       #21252b;
+  --fg:           #abb2bf;
+  --fg-muted:     #828997;
+  --accent:       #61afef;
+  --accent-2:     #c678dd;
+  --rule:         #3e4451;
+
+  /* code */
+  --code-bg:      #21252b;
+  --code-fg:      #abb2bf;
+  --code-border:  #3e4451;
+
+  /* type */
+  --font-heading: "Inter", system-ui, sans-serif;
+  --font-body:    "Inter", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+  --weight-heading: 700;
+  --weight-body:    400;
+
+  /* scale */
+  --scale-h1:    5.5rem;
+  --scale-h2:    3.25rem;
+  --scale-h3:    2.25rem;
+  --scale-body:  1.75rem;
+  --scale-small: 1.25rem;
+
+  /* layout */
+  --slide-padding: 5rem;
+  --slide-radius:  0;
+  --slide-bg-image: none;
+
+  /* shiki */
+  --shiki-theme: "one-dark-pro";
+}
+
+.theme-one-dark .slide-canvas h1 { color: #e6e6e6; letter-spacing: -0.015em; }
+.theme-one-dark .slide-canvas h2 { color: var(--accent); }
+.theme-one-dark .slide-canvas h3 { color: var(--accent-2); }
+.theme-one-dark .slide-canvas a { color: var(--accent); }
+.theme-one-dark .slide-canvas blockquote { border-left: 4px solid var(--accent-2); color: var(--fg-muted); }

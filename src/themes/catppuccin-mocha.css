@@ -1,0 +1,43 @@
+/* Catppuccin Mocha — purple-tinted dark, soft pastel accents */
+.theme-catppuccin-mocha {
+  /* surfaces */
+  --bg:           #1e1e2e;
+  --bg-alt:       #181825;
+  --fg:           #cdd6f4;
+  --fg-muted:     #a6adc8;
+  --accent:       #cba6f7;
+  --accent-2:     #f5c2e7;
+  --rule:         #45475a;
+
+  /* code */
+  --code-bg:      #181825;
+  --code-fg:      #cdd6f4;
+  --code-border:  #313244;
+
+  /* type */
+  --font-heading: "Inter", system-ui, sans-serif;
+  --font-body:    "Inter", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+  --weight-heading: 700;
+  --weight-body:    400;
+
+  /* scale */
+  --scale-h1:    5.5rem;
+  --scale-h2:    3.25rem;
+  --scale-h3:    2.25rem;
+  --scale-body:  1.75rem;
+  --scale-small: 1.25rem;
+
+  /* layout */
+  --slide-padding: 5rem;
+  --slide-radius:  0;
+  --slide-bg-image: none;
+
+  /* shiki */
+  --shiki-theme: "catppuccin-mocha";
+}
+
+.theme-catppuccin-mocha .slide-canvas h1 { letter-spacing: -0.02em; }
+.theme-catppuccin-mocha .slide-canvas h2 { color: var(--accent); }
+.theme-catppuccin-mocha .slide-canvas a { color: var(--accent); text-decoration-color: var(--accent-2); }
+.theme-catppuccin-mocha .slide-canvas blockquote { border-left: 4px solid var(--accent); color: var(--fg-muted); }

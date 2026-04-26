@@ -1,0 +1,43 @@
+/* Tokyo Night — deep navy, blue/purple accents */
+.theme-tokyo-night {
+  /* surfaces */
+  --bg:           #1a1b26;
+  --bg-alt:       #16161e;
+  --fg:           #c0caf5;
+  --fg-muted:     #9aa5ce;
+  --accent:       #7aa2f7;
+  --accent-2:     #bb9af7;
+  --rule:         #414868;
+
+  /* code */
+  --code-bg:      #16161e;
+  --code-fg:      #c0caf5;
+  --code-border:  #292e42;
+
+  /* type */
+  --font-heading: "Inter", system-ui, sans-serif;
+  --font-body:    "Inter", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+  --weight-heading: 700;
+  --weight-body:    400;
+
+  /* scale */
+  --scale-h1:    5.5rem;
+  --scale-h2:    3.25rem;
+  --scale-h3:    2.25rem;
+  --scale-body:  1.75rem;
+  --scale-small: 1.25rem;
+
+  /* layout */
+  --slide-padding: 5rem;
+  --slide-radius:  0;
+  --slide-bg-image: none;
+
+  /* shiki */
+  --shiki-theme: "tokyo-night";
+}
+
+.theme-tokyo-night .slide-canvas h1 { letter-spacing: -0.015em; }
+.theme-tokyo-night .slide-canvas h2 { color: var(--accent-2); }
+.theme-tokyo-night .slide-canvas a { color: var(--accent); }
+.theme-tokyo-night .slide-canvas blockquote { border-left: 4px solid var(--accent-2); color: var(--fg-muted); }

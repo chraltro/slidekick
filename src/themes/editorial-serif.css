@@ -1,0 +1,65 @@
+/* Editorial Serif — magazine style */
+.theme-editorial-serif {
+  /* surfaces */
+  --bg:           #fafaf7;
+  --bg-alt:       #f0eee6;
+  --fg:           #1a1a1a;
+  --fg-muted:     #5a5a5a;
+  --accent:       #b91c1c;
+  --accent-2:     #1a1a1a;
+  --rule:         #d4d2c8;
+
+  /* code */
+  --code-bg:      #f0eee6;
+  --code-fg:      #1a1a1a;
+  --code-border:  #d4d2c8;
+
+  /* type */
+  --font-heading: "Spectral", "Source Serif Pro", Georgia, serif;
+  --font-body:    "Spectral", "Source Serif Pro", Georgia, serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+  --weight-heading: 300;
+  --weight-body:    400;
+
+  /* scale */
+  --scale-h1:    5.5rem;
+  --scale-h2:    3.25rem;
+  --scale-h3:    2.25rem;
+  --scale-body:  1.85rem;
+  --scale-small: 1.25rem;
+
+  /* layout */
+  --slide-padding: 7rem;
+  --slide-radius:  0;
+  --slide-bg-image: none;
+
+  /* shiki */
+  --shiki-theme: "min-light";
+}
+
+/* Magazine-style overrides — thin, tracked headlines, accent rule under H1 */
+.theme-editorial-serif .slide-canvas h1 {
+  font-weight: 300;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid var(--accent);
+  margin-bottom: 2rem;
+}
+.theme-editorial-serif .slide-canvas h2 {
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: -0.015em;
+  color: var(--accent);
+}
+.theme-editorial-serif .slide-canvas h3 { font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; font-size: 1.5rem; }
+.theme-editorial-serif .slide-canvas blockquote {
+  border-left: none;
+  font-style: italic;
+  font-size: 2.25rem;
+  line-height: 1.35;
+  padding-left: 0;
+  color: var(--fg);
+}
+.theme-editorial-serif .slide-canvas a { color: var(--accent); text-decoration: underline; text-underline-offset: 0.2em; }
+.theme-editorial-serif .slide-canvas hr { border: 0; border-top: 1px solid var(--rule); }

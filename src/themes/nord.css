@@ -1,0 +1,43 @@
+/* Nord — arctic, cool blues */
+.theme-nord {
+  /* surfaces */
+  --bg:           #2e3440;
+  --bg-alt:       #3b4252;
+  --fg:           #eceff4;
+  --fg-muted:     #d8dee9;
+  --accent:       #88c0d0;
+  --accent-2:     #81a1c1;
+  --rule:         #4c566a;
+
+  /* code */
+  --code-bg:      #3b4252;
+  --code-fg:      #eceff4;
+  --code-border:  #434c5e;
+
+  /* type */
+  --font-heading: "Inter", system-ui, sans-serif;
+  --font-body:    "Inter", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+  --weight-heading: 700;
+  --weight-body:    400;
+
+  /* scale */
+  --scale-h1:    5.5rem;
+  --scale-h2:    3.25rem;
+  --scale-h3:    2.25rem;
+  --scale-body:  1.75rem;
+  --scale-small: 1.25rem;
+
+  /* layout */
+  --slide-padding: 5rem;
+  --slide-radius:  0;
+  --slide-bg-image: none;
+
+  /* shiki */
+  --shiki-theme: "nord";
+}
+
+.theme-nord .slide-canvas h1 { letter-spacing: -0.015em; }
+.theme-nord .slide-canvas h2 { color: var(--accent); }
+.theme-nord .slide-canvas a { color: var(--accent); }
+.theme-nord .slide-canvas blockquote { border-left: 4px solid var(--accent-2); color: var(--fg-muted); }

@@ -1,0 +1,43 @@
+/* Catppuccin Latte — cream paper version */
+.theme-catppuccin-latte {
+  /* surfaces */
+  --bg:           #eff1f5;
+  --bg-alt:       #e6e9ef;
+  --fg:           #4c4f69;
+  --fg-muted:     #6c6f85;
+  --accent:       #8839ef;
+  --accent-2:     #d20f39;
+  --rule:         #bcc0cc;
+
+  /* code */
+  --code-bg:      #e6e9ef;
+  --code-fg:      #4c4f69;
+  --code-border:  #ccd0da;
+
+  /* type */
+  --font-heading: "Inter", system-ui, sans-serif;
+  --font-body:    "Inter", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+  --weight-heading: 700;
+  --weight-body:    400;
+
+  /* scale */
+  --scale-h1:    5.5rem;
+  --scale-h2:    3.25rem;
+  --scale-h3:    2.25rem;
+  --scale-body:  1.75rem;
+  --scale-small: 1.25rem;
+
+  /* layout */
+  --slide-padding: 5rem;
+  --slide-radius:  0;
+  --slide-bg-image: none;
+
+  /* shiki */
+  --shiki-theme: "catppuccin-latte";
+}
+
+.theme-catppuccin-latte .slide-canvas h1 { letter-spacing: -0.02em; }
+.theme-catppuccin-latte .slide-canvas h2 { color: var(--accent); }
+.theme-catppuccin-latte .slide-canvas a { color: var(--accent); }
+.theme-catppuccin-latte .slide-canvas blockquote { border-left: 4px solid var(--accent); color: var(--fg-muted); }

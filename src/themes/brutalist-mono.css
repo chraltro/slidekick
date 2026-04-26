@@ -1,0 +1,62 @@
+/* Brutalist Mono — raw, hard-edged, all monospace */
+.theme-brutalist-mono {
+  /* surfaces */
+  --bg:           #ffffff;
+  --bg-alt:       #f2f2f2;
+  --fg:           #000000;
+  --fg-muted:     #555555;
+  --accent:       #000000;
+  --accent-2:     #ff0000;
+  --rule:         #000000;
+
+  /* code */
+  --code-bg:      #f2f2f2;
+  --code-fg:      #000000;
+  --code-border:  #000000;
+
+  /* type — mono everywhere */
+  --font-heading: "JetBrains Mono", ui-monospace, monospace;
+  --font-body:    "JetBrains Mono", ui-monospace, monospace;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+  --weight-heading: 800;
+  --weight-body:    400;
+
+  /* scale */
+  --scale-h1:    5.5rem;
+  --scale-h2:    3.25rem;
+  --scale-h3:    2.25rem;
+  --scale-body:  1.75rem;
+  --scale-small: 1.25rem;
+
+  /* layout */
+  --slide-padding: 5rem;
+  --slide-radius:  0;
+  --slide-bg-image: none;
+
+  /* shiki */
+  --shiki-theme: "github-light";
+}
+
+/* Brutalist overrides — square brackets, hard borders, raw blockquote */
+.theme-brutalist-mono .slide-canvas h1 {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.theme-brutalist-mono .slide-canvas h1::before { content: "["; color: var(--accent-2); margin-right: 0.5rem; }
+.theme-brutalist-mono .slide-canvas h1::after  { content: "]"; color: var(--accent-2); margin-left:  0.5rem; }
+.theme-brutalist-mono .slide-canvas h2 { font-weight: 700; text-transform: uppercase; }
+.theme-brutalist-mono .slide-canvas h3 { font-weight: 700; }
+.theme-brutalist-mono .slide-canvas blockquote {
+  border-left: 1rem solid #000000;
+  padding-left: 1.5rem;
+  font-style: normal;
+  background: #f2f2f2;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+.theme-brutalist-mono .slide-canvas a { color: var(--accent-2); text-decoration: underline; }
+.theme-brutalist-mono .slide-canvas pre,
+.theme-brutalist-mono .slide-canvas code { border: 2px solid #000000; border-radius: 0; }
+.theme-brutalist-mono .slide-canvas hr { border: 0; border-top: 4px solid #000000; }

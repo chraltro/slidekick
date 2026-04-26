@@ -1,0 +1,43 @@
+/* Dracula — classic dark with pink/green accents */
+.theme-dracula {
+  /* surfaces */
+  --bg:           #282a36;
+  --bg-alt:       #21222c;
+  --fg:           #f8f8f2;
+  --fg-muted:     #bdc0cc;
+  --accent:       #ff79c6;
+  --accent-2:     #50fa7b;
+  --rule:         #44475a;
+
+  /* code */
+  --code-bg:      #21222c;
+  --code-fg:      #f8f8f2;
+  --code-border:  #44475a;
+
+  /* type */
+  --font-heading: "Inter", system-ui, sans-serif;
+  --font-body:    "Inter", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+  --weight-heading: 700;
+  --weight-body:    400;
+
+  /* scale */
+  --scale-h1:    5.5rem;
+  --scale-h2:    3.25rem;
+  --scale-h3:    2.25rem;
+  --scale-body:  1.75rem;
+  --scale-small: 1.25rem;
+
+  /* layout */
+  --slide-padding: 5rem;
+  --slide-radius:  0;
+  --slide-bg-image: none;
+
+  /* shiki */
+  --shiki-theme: "dracula";
+}
+
+.theme-dracula .slide-canvas h1 { color: var(--accent); letter-spacing: -0.015em; }
+.theme-dracula .slide-canvas h2 { color: var(--accent-2); }
+.theme-dracula .slide-canvas a { color: var(--accent); }
+.theme-dracula .slide-canvas blockquote { border-left: 4px solid var(--accent); color: var(--fg-muted); }

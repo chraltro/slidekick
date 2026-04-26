@@ -1,0 +1,43 @@
+/* Gruvbox Dark — warm retro palette */
+.theme-gruvbox-dark {
+  /* surfaces */
+  --bg:           #282828;
+  --bg-alt:       #1d2021;
+  --fg:           #ebdbb2;
+  --fg-muted:     #a89984;
+  --accent:       #fabd2f;
+  --accent-2:     #fb4934;
+  --rule:         #504945;
+
+  /* code */
+  --code-bg:      #1d2021;
+  --code-fg:      #ebdbb2;
+  --code-border:  #3c3836;
+
+  /* type */
+  --font-heading: "Inter", system-ui, sans-serif;
+  --font-body:    "Inter", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+  --weight-heading: 700;
+  --weight-body:    400;
+
+  /* scale */
+  --scale-h1:    5.5rem;
+  --scale-h2:    3.25rem;
+  --scale-h3:    2.25rem;
+  --scale-body:  1.75rem;
+  --scale-small: 1.25rem;
+
+  /* layout */
+  --slide-padding: 5rem;
+  --slide-radius:  0;
+  --slide-bg-image: none;
+
+  /* shiki */
+  --shiki-theme: "github-dark";
+}
+
+.theme-gruvbox-dark .slide-canvas h1 { color: var(--accent); letter-spacing: -0.01em; }
+.theme-gruvbox-dark .slide-canvas h2 { color: var(--accent-2); }
+.theme-gruvbox-dark .slide-canvas a { color: var(--accent); }
+.theme-gruvbox-dark .slide-canvas blockquote { border-left: 4px solid var(--accent-2); color: var(--fg-muted); }

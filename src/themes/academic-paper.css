@@ -1,0 +1,54 @@
+/* Academic Paper — LaTeX-style serif throughout */
+.theme-academic-paper {
+  /* surfaces */
+  --bg:           #fefefe;
+  --bg-alt:       #f5f5f0;
+  --fg:           #1a1a1a;
+  --fg-muted:     #4a4a4a;
+  --accent:       #6b21a8;
+  --accent-2:     #4338ca;
+  --rule:         #d4d4d4;
+
+  /* code */
+  --code-bg:      #f5f5f0;
+  --code-fg:      #1a1a1a;
+  --code-border:  #d4d4d4;
+
+  /* type — serif everywhere except mono */
+  --font-heading: "Computer Modern Serif", "Latin Modern Roman", "Times New Roman", serif;
+  --font-body:    "Computer Modern Serif", "Latin Modern Roman", "Times New Roman", serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+  --weight-heading: 700;
+  --weight-body:    400;
+
+  /* scale */
+  --scale-h1:    5.5rem;
+  --scale-h2:    3.25rem;
+  --scale-h3:    2.25rem;
+  --scale-body:  1.7rem;
+  --scale-small: 1.25rem;
+
+  /* layout */
+  --slide-padding: 5rem;
+  --slide-radius:  0;
+  --slide-bg-image: none;
+
+  /* shiki */
+  --shiki-theme: "solarized-light";
+}
+
+/* LaTeX-style indented italic quotes, no left border */
+.theme-academic-paper .slide-canvas h1 { font-weight: 700; letter-spacing: -0.01em; line-height: 1.15; }
+.theme-academic-paper .slide-canvas h2 { font-style: italic; font-weight: 600; color: var(--accent); }
+.theme-academic-paper .slide-canvas h3 { font-weight: 700; font-size: 1.85rem; }
+.theme-academic-paper .slide-canvas blockquote {
+  border-left: none;
+  font-style: italic;
+  margin-left: 3rem;
+  margin-right: 3rem;
+  padding-left: 0;
+  color: var(--fg);
+}
+.theme-academic-paper .slide-canvas blockquote::before { content: "\201C"; font-size: 4rem; line-height: 0.5; vertical-align: -0.4em; margin-right: 0.25rem; color: var(--fg-muted); }
+.theme-academic-paper .slide-canvas a { color: var(--accent); text-decoration: underline; }
+.theme-academic-paper .slide-canvas p { text-align: justify; hyphens: auto; }

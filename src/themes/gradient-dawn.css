@@ -1,0 +1,69 @@
+/* Gradient Dawn — full-bleed pastel gradient with glassmorphic code */
+.theme-gradient-dawn {
+  /* surfaces */
+  --bg:           #fbcfe8;
+  --bg-alt:       rgba(255,255,255,0.18);
+  --fg:           #ffffff;
+  --fg-muted:     rgba(255,255,255,0.85);
+  --accent:       #ffffff;
+  --accent-2:     #fef3c7;
+  --rule:         rgba(255,255,255,0.4);
+
+  /* code — glassmorphic, see overrides */
+  --code-bg:      rgba(255,255,255,0.18);
+  --code-fg:      #ffffff;
+  --code-border:  rgba(255,255,255,0.3);
+
+  /* type */
+  --font-heading: "Inter", system-ui, sans-serif;
+  --font-body:    "Inter", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+  --weight-heading: 700;
+  --weight-body:    400;
+
+  /* scale */
+  --scale-h1:    5.5rem;
+  --scale-h2:    3.25rem;
+  --scale-h3:    2.25rem;
+  --scale-body:  1.75rem;
+  --scale-small: 1.25rem;
+
+  /* layout */
+  --slide-padding: 5rem;
+  --slide-radius:  0;
+  --slide-bg-image: linear-gradient(135deg, #fbcfe8 0%, #c7d2fe 50%, #a5b4fc 100%);
+
+  /* shiki */
+  --shiki-theme: "min-light";
+}
+
+/* Full-bleed gradient + glassmorphic code blocks */
+.theme-gradient-dawn .slide-canvas {
+  background-size: cover;
+  background-position: center;
+}
+.theme-gradient-dawn .slide-canvas h1 {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.08);
+}
+.theme-gradient-dawn .slide-canvas h2 {
+  font-weight: 600;
+  color: rgba(255,255,255,0.95);
+}
+.theme-gradient-dawn .slide-canvas pre,
+.theme-gradient-dawn .slide-canvas code {
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #ffffff;
+}
+.theme-gradient-dawn .slide-canvas blockquote {
+  border-left: 4px solid rgba(255,255,255,0.6);
+  color: rgba(255,255,255,0.95);
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(12px);
+  padding: 1rem 1.5rem;
+}
+.theme-gradient-dawn .slide-canvas a { color: #ffffff; text-decoration: underline; }

@@ -1,0 +1,44 @@
+/* Solarized Light — warm ivory background */
+.theme-solarized-light {
+  /* surfaces */
+  --bg:           #fdf6e3;
+  --bg-alt:       #eee8d5;
+  --fg:           #586e75;
+  --fg-muted:     #93a1a1;
+  --accent:       #268bd2;
+  --accent-2:     #d33682;
+  --rule:         #d8d2bf;
+
+  /* code */
+  --code-bg:      #eee8d5;
+  --code-fg:      #586e75;
+  --code-border:  #d8d2bf;
+
+  /* type */
+  --font-heading: "Inter", system-ui, sans-serif;
+  --font-body:    "Inter", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+  --weight-heading: 700;
+  --weight-body:    400;
+
+  /* scale */
+  --scale-h1:    5.5rem;
+  --scale-h2:    3.25rem;
+  --scale-h3:    2.25rem;
+  --scale-body:  1.75rem;
+  --scale-small: 1.25rem;
+
+  /* layout */
+  --slide-padding: 5rem;
+  --slide-radius:  0;
+  --slide-bg-image: none;
+
+  /* shiki */
+  --shiki-theme: "solarized-light";
+}
+
+.theme-solarized-light .slide-canvas h1 { color: #073642; letter-spacing: -0.015em; }
+.theme-solarized-light .slide-canvas h2 { color: var(--accent); }
+.theme-solarized-light .slide-canvas h3 { color: var(--accent-2); }
+.theme-solarized-light .slide-canvas a { color: var(--accent); }
+.theme-solarized-light .slide-canvas blockquote { border-left: 4px solid var(--accent); color: var(--fg-muted); }

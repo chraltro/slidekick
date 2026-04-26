@@ -1,0 +1,51 @@
+/* Corporate Clean — navy + slate, conservative */
+.theme-corporate-clean {
+  /* surfaces */
+  --bg:           #ffffff;
+  --bg-alt:       #f1f5f9;
+  --fg:           #0f172a;
+  --fg-muted:     #475569;
+  --accent:       #1e3a8a;
+  --accent-2:     #475569;
+  --rule:         #e2e8f0;
+
+  /* code */
+  --code-bg:      #f1f5f9;
+  --code-fg:      #0f172a;
+  --code-border:  #cbd5e1;
+
+  /* type */
+  --font-heading: "Inter", system-ui, sans-serif;
+  --font-body:    "Inter", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+  --weight-heading: 700;
+  --weight-body:    400;
+
+  /* scale */
+  --scale-h1:    5.5rem;
+  --scale-h2:    3.25rem;
+  --scale-h3:    2.25rem;
+  --scale-body:  1.75rem;
+  --scale-small: 1.25rem;
+
+  /* layout */
+  --slide-padding: 5rem;
+  --slide-radius:  0;
+  --slide-bg-image: none;
+
+  /* shiki */
+  --shiki-theme: "github-light";
+}
+
+/* Navy left border treatment for H1 */
+.theme-corporate-clean .slide-canvas h1 {
+  border-left: 8px solid var(--accent);
+  padding-left: 2rem;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.theme-corporate-clean .slide-canvas h2 { color: var(--accent); }
+.theme-corporate-clean .slide-canvas h3 { color: var(--accent-2); text-transform: uppercase; letter-spacing: 0.05em; font-size: 1.5rem; }
+.theme-corporate-clean .slide-canvas a { color: var(--accent); text-decoration: underline; }
+.theme-corporate-clean .slide-canvas blockquote { border-left: 4px solid var(--accent); color: var(--fg-muted); }
+.theme-corporate-clean .slide-canvas table th { background: var(--bg-alt); }

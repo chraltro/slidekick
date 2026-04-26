@@ -1,0 +1,60 @@
+/* Midnight Terminal — pure black, neon green CRT */
+.theme-midnight-terminal {
+  /* surfaces */
+  --bg:           #000000;
+  --bg-alt:       #0a0a0a;
+  --fg:           #d4d4d4;
+  --fg-muted:     #888888;
+  --accent:       #00ff88;
+  --accent-2:     #00d9ff;
+  --rule:         #1a1a1a;
+
+  /* code */
+  --code-bg:      #0a0a0a;
+  --code-fg:      #d4d4d4;
+  --code-border:  #1a1a1a;
+
+  /* type — mono everywhere */
+  --font-heading: "JetBrains Mono", ui-monospace, monospace;
+  --font-body:    "JetBrains Mono", ui-monospace, monospace;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+  --weight-heading: 700;
+  --weight-body:    400;
+
+  /* scale */
+  --scale-h1:    5.5rem;
+  --scale-h2:    3.25rem;
+  --scale-h3:    2.25rem;
+  --scale-body:  1.75rem;
+  --scale-small: 1.25rem;
+
+  /* layout */
+  --slide-padding: 5rem;
+  --slide-radius:  0;
+  --slide-bg-image: none;
+
+  /* shiki */
+  --shiki-theme: "github-dark";
+}
+
+/* Terminal aesthetic — $ prompt prefix, tight leading, neon accent */
+.theme-midnight-terminal .slide-canvas h1 {
+  color: var(--accent);
+  line-height: 1.1;
+  letter-spacing: 0;
+  text-shadow: 0 0 12px rgba(0,255,136,0.45);
+}
+.theme-midnight-terminal .slide-canvas h1::before {
+  content: "$ ";
+  color: var(--accent-2);
+}
+.theme-midnight-terminal .slide-canvas h2 {
+  color: var(--accent-2);
+  line-height: 1.1;
+}
+.theme-midnight-terminal .slide-canvas h2::before { content: "> "; color: var(--fg-muted); }
+.theme-midnight-terminal .slide-canvas h3 { color: var(--accent); }
+.theme-midnight-terminal .slide-canvas a { color: var(--accent-2); text-decoration: underline; }
+.theme-midnight-terminal .slide-canvas blockquote { border-left: 4px solid var(--accent); color: var(--fg-muted); }
+.theme-midnight-terminal .slide-canvas .accent-bar { background: var(--accent); }
+.theme-midnight-terminal .slide-canvas ul li::marker { color: var(--accent); content: "› "; }

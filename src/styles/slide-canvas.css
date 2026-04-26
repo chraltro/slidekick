@@ -1,0 +1,678 @@
+/* Fixed-canvas slide system. Type sizes are rem-based against a fixed 16px root,
+   so a 5.5rem H1 is always exactly 88px regardless of viewport. The canvas is
+   scaled with transform, never reflowed. */
+
+.slide-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--bg, #1e1e2e);
+}
+
+.slide-scaler {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: center center;
+  /* The actual scale is set inline as a CSS variable --fit-scale */
+  transform: translate(-50%, -50%) scale(var(--fit-scale, 1));
+  will-change: transform;
+}
+
+/* Aspect-ratio canvases. */
+.slide-canvas {
+  position: relative;
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  background: var(--bg, #1e1e2e);
+  color: var(--fg, #cdd6f4);
+  font-family: var(--font-body, 'Inter', system-ui, sans-serif);
+  font-size: 16px;
+  line-height: 1.4;
+  background-image: var(--slide-bg-image, none);
+  background-size: cover;
+  background-position: center;
+}
+
+.slide-canvas.aspect-4-3 {
+  width: 1440px;
+  height: 1080px;
+}
+.slide-canvas.aspect-1-1 {
+  width: 1080px;
+  height: 1080px;
+}
+
+/* Slide content typography */
+.slide-canvas h1,
+.slide-canvas h2,
+.slide-canvas h3,
+.slide-canvas h4 {
+  font-family: var(--font-heading, inherit);
+  font-weight: var(--weight-heading, 700);
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--fg, inherit);
+}
+
+.slide-canvas h1 {
+  font-size: var(--scale-h1, 5.5rem);
+  line-height: 1.05;
+  margin: 0 0 0.4em 0;
+}
+.slide-canvas h2 {
+  font-size: var(--scale-h2, 3.25rem);
+  line-height: 1.1;
+  margin: 0 0 0.5em 0;
+}
+.slide-canvas h3 {
+  font-size: var(--scale-h3, 2.25rem);
+  line-height: 1.15;
+  margin: 0 0 0.5em 0;
+}
+.slide-canvas h2 + ul,
+.slide-canvas h2 + ol,
+.slide-canvas h2 + p,
+.slide-canvas h3 + ul,
+.slide-canvas h3 + ol,
+.slide-canvas h3 + p {
+  margin-top: 0.4em;
+}
+.slide-canvas p,
+.slide-canvas li {
+  font-size: var(--scale-body, 1.75rem);
+  line-height: 1.45;
+  margin: 0 0 0.6em 0;
+}
+.slide-canvas small,
+.slide-canvas .footer {
+  font-size: var(--scale-small, 1.25rem);
+  color: var(--fg-muted, currentColor);
+}
+
+.slide-canvas ul,
+.slide-canvas ol {
+  margin: 0;
+  padding-left: 1.5em;
+}
+.slide-canvas ul {
+  list-style-type: disc;
+  list-style-position: outside;
+}
+.slide-canvas ol {
+  list-style-type: decimal;
+  list-style-position: outside;
+}
+.slide-canvas ul ul {
+  list-style-type: circle;
+}
+.slide-canvas ul ul ul {
+  list-style-type: square;
+}
+.slide-canvas li {
+  margin-bottom: 0.4em;
+  display: list-item;
+}
+.slide-canvas li::marker {
+  color: var(--accent, currentColor);
+}
+
+.slide-canvas a {
+  color: var(--accent, inherit);
+  text-decoration: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.2em;
+}
+
+.slide-canvas blockquote {
+  margin: 0;
+  padding: 1.2rem 1.6rem;
+  border-left: 6px solid var(--accent, currentColor);
+  font-style: italic;
+  color: var(--fg-muted, inherit);
+}
+
+.slide-canvas hr {
+  border: none;
+  border-top: 2px solid var(--rule, currentColor);
+  margin: 1.2em 0;
+}
+
+.slide-canvas img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: var(--slide-radius, 0);
+}
+
+.slide-canvas table {
+  border-collapse: collapse;
+  font-size: var(--scale-body, 1.75rem);
+}
+.slide-canvas th,
+.slide-canvas td {
+  padding: 0.4em 0.8em;
+  border-bottom: 1px solid var(--rule, currentColor);
+  text-align: left;
+}
+.slide-canvas th {
+  font-weight: 700;
+  color: var(--accent, inherit);
+}
+
+/* ---------- Layouts ---------- */
+
+.layout-title {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: var(--slide-padding, 5rem);
+  height: 100%;
+}
+.layout-title h1 {
+  font-size: var(--scale-h1, 5.5rem);
+}
+.layout-title .subtitle {
+  font-size: var(--scale-h3, 2.25rem);
+  color: var(--fg-muted, inherit);
+  margin-top: 0.6em;
+  font-weight: 400;
+}
+.layout-title .accent-bar {
+  width: 8rem;
+  height: 0.4rem;
+  background: var(--accent, currentColor);
+  margin-top: 2rem;
+  border-radius: 0.2rem;
+}
+
+.layout-content {
+  display: flex;
+  flex-direction: column;
+  padding: var(--slide-padding, 5rem);
+  height: 100%;
+  overflow: hidden;
+}
+.layout-content > div {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.4em;
+}
+.layout-content h1,
+.layout-content h2 {
+  flex: 0 0 auto;
+}
+.layout-content h1 {
+  margin-bottom: 0.4em;
+}
+.layout-content h2 {
+  margin-bottom: 1rem;
+}
+
+.layout-two-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: min-content;
+  gap: 1.5rem 4rem;
+  padding: var(--slide-padding, 5rem);
+  height: 100%;
+  align-content: start;
+}
+.layout-two-column .col {
+  overflow: hidden;
+}
+.layout-two-column .col-header {
+  grid-column: 1 / -1;
+  margin-bottom: 0.5rem;
+}
+.layout-two-column .col-header h1,
+.layout-two-column .col-header h2 {
+  margin: 0;
+}
+
+.layout-image-left,
+.layout-image-right {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 4rem;
+  padding: var(--slide-padding, 5rem);
+  height: 100%;
+  align-items: center;
+}
+.layout-image-right {
+  grid-template-columns: 1.2fr 1fr;
+}
+.layout-image-left .image,
+.layout-image-right .image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+.layout-image-left .image img,
+.layout-image-right .image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--slide-radius, 0);
+}
+
+.layout-full-image {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+.layout-full-image .image,
+.layout-full-image img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.layout-full-image .caption {
+  position: absolute;
+  left: 5rem;
+  bottom: 5rem;
+  right: 5rem;
+  padding: 1.5rem 2rem;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  backdrop-filter: blur(8px);
+  border-radius: 0.5rem;
+}
+
+.layout-code-focus {
+  display: flex;
+  flex-direction: column;
+  padding: var(--slide-padding, 5rem);
+  height: 100%;
+  min-height: 0;
+}
+/* EnhancedHtml renders a wrapper <div> — make it a flex column so the
+   codeblock inside can grow. */
+.layout-code-focus > div {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.layout-code-focus h1,
+.layout-code-focus h2 {
+  flex: 0 0 auto;
+  margin: 0;
+}
+.layout-code-focus .codeblock {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+.layout-code-focus .codeblock pre {
+  flex: 1 1 auto;
+  margin: 0 !important;
+  font-size: 2rem !important;
+  line-height: 1.55;
+  min-height: 0;
+  /* Code reads top-down; don't center vertically (leaves big empty bands). */
+  padding: 1.5rem 1.8rem !important;
+}
+.layout-code-focus .codeblock-header {
+  flex: 0 0 auto;
+}
+
+.layout-quote {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: var(--slide-padding, 5rem);
+  height: 100%;
+}
+.layout-quote blockquote,
+.layout-quote blockquote p {
+  font-size: 3.5rem;
+  font-style: italic;
+  text-align: center;
+  color: var(--fg, inherit);
+  line-height: 1.25;
+}
+.layout-quote blockquote {
+  border-left: none;
+  padding: 0;
+  margin: 0;
+  max-width: 1500px;
+}
+.layout-quote blockquote p {
+  margin: 0 0 0.4em 0;
+}
+.layout-quote .attribution {
+  margin-top: 2.5rem;
+  font-size: 1.6rem;
+  color: var(--fg-muted, currentColor);
+  font-style: normal;
+  letter-spacing: 0.05em;
+}
+.layout-quote .attribution::before {
+  content: '— ';
+}
+
+.layout-section-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  padding: var(--slide-padding, 5rem);
+  background: var(--accent, currentColor);
+  color: var(--bg, #fff);
+}
+.layout-section-divider h1 {
+  font-size: 7rem;
+  color: var(--bg, #fff);
+}
+
+.layout-end {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 100%;
+  padding: var(--slide-padding, 5rem);
+}
+.layout-end h1 {
+  font-size: 8rem;
+  letter-spacing: -0.02em;
+}
+.layout-end .subtitle {
+  font-size: 3rem;
+  color: var(--fg-muted, currentColor);
+  margin-top: 1.5rem;
+  font-weight: 400;
+}
+.layout-end .accent-bar {
+  width: 12rem;
+  height: 0.4rem;
+  background: var(--accent, currentColor);
+  margin-top: 2rem;
+  border-radius: 0.2rem;
+}
+
+/* Code block chrome */
+.slide-canvas .codeblock {
+  background: var(--code-bg, #181825);
+  border: 1px solid var(--code-border, transparent);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  margin: 1rem 0;
+  font-family: var(--font-mono, monospace);
+}
+.slide-canvas .codeblock-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid var(--code-border, rgba(255, 255, 255, 0.06));
+  font-size: 1rem;
+  color: var(--fg-muted, currentColor);
+}
+.slide-canvas .codeblock-mac-dots {
+  display: inline-flex;
+  gap: 0.5rem;
+  margin-right: 0.8rem;
+}
+.slide-canvas .codeblock-mac-dots span {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  display: inline-block;
+}
+.slide-canvas .codeblock-mac-dots span:nth-child(1) { background: #ff5f57; }
+.slide-canvas .codeblock-mac-dots span:nth-child(2) { background: #febc2e; }
+.slide-canvas .codeblock-mac-dots span:nth-child(3) { background: #28c840; }
+.slide-canvas .codeblock-title {
+  flex: 1;
+  font-size: 1rem;
+  color: var(--fg-muted, currentColor);
+  text-align: center;
+}
+.slide-canvas .codeblock-lang {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent, currentColor);
+}
+.slide-canvas .codeblock-copy {
+  background: transparent;
+  border: 1px solid var(--code-border, rgba(255, 255, 255, 0.1));
+  color: var(--fg-muted, currentColor);
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.3rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-left: 0.6rem;
+}
+.slide-canvas .codeblock-copy:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+.slide-canvas .codeblock pre {
+  margin: 0;
+  padding: 1rem 1.2rem;
+  overflow: auto;
+  font-size: 1.4rem;
+  line-height: 1.5;
+  background: transparent !important;
+}
+.slide-canvas .codeblock code {
+  font-family: var(--font-mono, monospace);
+  white-space: pre;
+}
+.slide-canvas .codeblock .line.dimmed {
+  opacity: 0.35;
+}
+.slide-canvas .codeblock .line.highlighted {
+  background: rgba(255, 255, 255, 0.06);
+  display: inline-block;
+  width: 100%;
+}
+.slide-canvas .codeblock.with-line-numbers .line {
+  counter-increment: line;
+}
+.slide-canvas .codeblock.with-line-numbers .line::before {
+  content: counter(line);
+  display: inline-block;
+  width: 2.5em;
+  margin-right: 1em;
+  text-align: right;
+  color: var(--fg-muted, currentColor);
+  opacity: 0.5;
+}
+.slide-canvas .codeblock.with-line-numbers pre {
+  counter-reset: line;
+}
+
+/* KaTeX inherits text color and slide body sizing */
+.slide-canvas .katex {
+  color: inherit;
+}
+.slide-canvas .math-inline {
+  font-size: inherit;
+}
+.slide-canvas .math-block {
+  font-size: 2.6rem;
+  margin: 0.6em 0;
+  text-align: center;
+}
+.slide-canvas .math-block .katex-display {
+  margin: 0;
+}
+.slide-canvas .math-block .katex {
+  font-size: 1em;
+}
+
+/* Mermaid: center in the available area; let the SVG keep its aspect ratio
+   so internal text/labels stay legible. */
+.slide-canvas .mermaid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 1rem 0;
+}
+.slide-canvas .mermaid svg {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+}
+/* ---------- Mermaid label rendering ----------
+   Goal: a single clean pill behind edge labels (no nested boxes), text
+   vertically centered, and the node boxes (rect.basic.label-container) left
+   alone. */
+
+.slide-canvas .mermaid {
+  user-select: none;
+}
+
+.slide-canvas .mermaid foreignObject {
+  overflow: visible;
+}
+
+/* Default p-styles leak in from `.slide-canvas p` (font-size 2rem etc.) and
+   would force text to overflow the foreignObject mermaid sized for its own
+   metrics. Reset margins/padding and inherit mermaid's font sizing. */
+.slide-canvas .mermaid foreignObject p {
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: inherit !important;
+  line-height: 1.2 !important;
+  background: transparent !important;
+}
+
+/* The labelBkg div mermaid generates uses display:table-cell — switch it to
+   flex centering so the inner span (and its <p>) sit at the box centre on
+   both axes. */
+.slide-canvas .mermaid .node foreignObject > div {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Edge label background — mermaid paints both .labelBkg (div) AND
+   span.edgeLabel. Strip both, then re-paint on JUST the inner span so we
+   end up with a single pill. */
+.slide-canvas .mermaid .edgeLabel .labelBkg,
+.slide-canvas .mermaid .edgeLabels .labelBkg {
+  background: transparent !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+}
+.slide-canvas .mermaid .edgeLabel span.edgeLabel,
+.slide-canvas .mermaid .edgeLabels span.edgeLabel {
+  display: inline-block !important;
+  background-color: var(--code-bg, hsl(0, 0%, 22%)) !important;
+  color: var(--fg, #ddd) !important;
+  padding: 4px 10px !important;
+  border-radius: 6px !important;
+  line-height: 1.2 !important;
+  font-family: 'Inter', 'Trebuchet MS', sans-serif !important;
+  white-space: nowrap;
+}
+
+/* Node label text — let mermaid keep its rect box; just normalize the font
+   and remove default margins. */
+.slide-canvas .mermaid .nodeLabel {
+  display: inline-block !important;
+  font-family: 'Inter', 'Trebuchet MS', sans-serif !important;
+  white-space: nowrap;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+/* Page-number footer (shown when frontmatter pageNumber: true) */
+.slide-canvas .page-number {
+  position: absolute;
+  right: 2rem;
+  bottom: 1.5rem;
+  font-size: 1.1rem;
+  color: var(--fg-muted, currentColor);
+  opacity: 0.7;
+}
+
+/* ---------- Fragments (step-by-step list reveal) ---------- */
+/* Items written as `+ Foo` get hidden until the slide's fragmentStep reaches
+   their data-fragment value. We use opacity rather than display so layout
+   stays stable. */
+.slide-canvas li[data-fragment] {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.slide-canvas[data-fragment-step="0"] li[data-fragment="1"],
+.slide-canvas[data-fragment-step="0"] li[data-fragment="2"],
+.slide-canvas[data-fragment-step="0"] li[data-fragment]:not([data-fragment="0"]),
+.slide-canvas li[data-fragment]:not([data-fragment="1"]):not([data-fragment="2"]):not([data-fragment="3"]):not([data-fragment="4"]):not([data-fragment="5"]):not([data-fragment="6"]):not([data-fragment="7"]):not([data-fragment="8"]):not([data-fragment="9"]) {
+  /* fallback */
+}
+.slide-canvas li[data-fragment] {
+  opacity: 0.15;
+  filter: blur(0);
+  pointer-events: none;
+}
+/* Reveal items whose data-fragment <= current fragmentStep. Implemented as
+   incremental rules covering steps 1..12 (more than enough per slide). */
+.slide-canvas[data-fragment-step="1"] li[data-fragment="1"],
+.slide-canvas[data-fragment-step="2"] li[data-fragment="1"],
+.slide-canvas[data-fragment-step="2"] li[data-fragment="2"],
+.slide-canvas[data-fragment-step="3"] li[data-fragment="1"],
+.slide-canvas[data-fragment-step="3"] li[data-fragment="2"],
+.slide-canvas[data-fragment-step="3"] li[data-fragment="3"],
+.slide-canvas[data-fragment-step="4"] li[data-fragment="1"],
+.slide-canvas[data-fragment-step="4"] li[data-fragment="2"],
+.slide-canvas[data-fragment-step="4"] li[data-fragment="3"],
+.slide-canvas[data-fragment-step="4"] li[data-fragment="4"],
+.slide-canvas[data-fragment-step="5"] li[data-fragment="1"],
+.slide-canvas[data-fragment-step="5"] li[data-fragment="2"],
+.slide-canvas[data-fragment-step="5"] li[data-fragment="3"],
+.slide-canvas[data-fragment-step="5"] li[data-fragment="4"],
+.slide-canvas[data-fragment-step="5"] li[data-fragment="5"],
+.slide-canvas[data-fragment-step="6"] li[data-fragment="1"],
+.slide-canvas[data-fragment-step="6"] li[data-fragment="2"],
+.slide-canvas[data-fragment-step="6"] li[data-fragment="3"],
+.slide-canvas[data-fragment-step="6"] li[data-fragment="4"],
+.slide-canvas[data-fragment-step="6"] li[data-fragment="5"],
+.slide-canvas[data-fragment-step="6"] li[data-fragment="6"],
+.slide-canvas[data-fragment-step="7"] li[data-fragment],
+.slide-canvas[data-fragment-step="8"] li[data-fragment],
+.slide-canvas[data-fragment-step="9"] li[data-fragment],
+.slide-canvas[data-fragment-step="10"] li[data-fragment],
+.slide-canvas[data-fragment-step="11"] li[data-fragment],
+.slide-canvas[data-fragment-step="12"] li[data-fragment] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ---------- Slide transitions ---------- */
+@keyframes slide-fade-in { from { opacity: 0 } to { opacity: 1 } }
+@keyframes slide-slide-in { from { opacity: 0; transform: translateX(40px) } to { opacity: 1; transform: translateX(0) } }
+.slide-canvas.transition-fade { animation: slide-fade-in 0.25s ease both; }
+.slide-canvas.transition-slide { animation: slide-slide-in 0.3s ease both; }
+.slide-canvas.transition-none { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .slide-canvas { animation: none !important; }
+}

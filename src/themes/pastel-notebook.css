@@ -1,0 +1,68 @@
+/* Pastel Notebook — graph paper, handwriting heading */
+.theme-pastel-notebook {
+  /* surfaces */
+  --bg:           #fffaf0;
+  --bg-alt:       #fef3c7;
+  --fg:           #2a2a2a;
+  --fg-muted:     #6b7280;
+  --accent:       #ea580c;
+  --accent-2:     #16a34a;
+  --rule:         #e5d9b8;
+
+  /* code */
+  --code-bg:      #fef3c7;
+  --code-fg:      #2a2a2a;
+  --code-border:  #e5d9b8;
+
+  /* type */
+  --font-heading: "Caveat", "Comic Sans MS", cursive;
+  --font-body:    "Inter", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+  --weight-heading: 700;
+  --weight-body:    400;
+
+  /* scale */
+  --scale-h1:    5.5rem;
+  --scale-h2:    3.25rem;
+  --scale-h3:    2.25rem;
+  --scale-body:  1.75rem;
+  --scale-small: 1.25rem;
+
+  /* layout */
+  --slide-padding: 5rem;
+  --slide-radius:  0;
+  --slide-bg-image: linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+
+  /* shiki */
+  --shiki-theme: "min-light";
+}
+
+/* Apply graph paper background-size to canvas */
+.theme-pastel-notebook .slide-canvas {
+  background-size: 40px 40px;
+}
+.theme-pastel-notebook .slide-canvas h1 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0;
+  font-size: 6.5rem;
+  line-height: 1;
+}
+.theme-pastel-notebook .slide-canvas h2 {
+  font-family: var(--font-heading);
+  color: var(--accent-2);
+  font-size: 4rem;
+}
+.theme-pastel-notebook .slide-canvas h3 {
+  font-family: var(--font-heading);
+  color: var(--accent);
+}
+.theme-pastel-notebook .slide-canvas a { color: var(--accent); text-decoration: underline wavy; }
+.theme-pastel-notebook .slide-canvas blockquote {
+  border-left: 4px dashed var(--accent-2);
+  color: var(--fg-muted);
+  background: rgba(254, 243, 199, 0.5);
+  padding: 1rem 1.5rem;
+}
+.theme-pastel-notebook .slide-canvas ul li::marker { color: var(--accent); }

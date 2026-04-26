@@ -1,0 +1,25 @@
+node_modules
+dist
+dist-ssr
+*.local
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.env
+.env.*
+!.env.example
+dev-dist
+
+# Test artefacts
+tests/artifacts/
+test-results/
+playwright-report/
+
+# OS
+Thumbs.db

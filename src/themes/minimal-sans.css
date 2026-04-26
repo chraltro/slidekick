@@ -1,0 +1,58 @@
+/* Minimal Sans — quiet, modern, restrained */
+.theme-minimal-sans {
+  /* surfaces */
+  --bg:           #fcfcfc;
+  --bg-alt:       #f4f4f5;
+  --fg:           #111111;
+  --fg-muted:     #6b7280;
+  --accent:       #2563eb;
+  --accent-2:     #0ea5e9;
+  --rule:         #e5e7eb;
+
+  /* code */
+  --code-bg:      #f4f4f5;
+  --code-fg:      #111111;
+  --code-border:  #e5e7eb;
+
+  /* type */
+  --font-heading: "Inter", system-ui, sans-serif;
+  --font-body:    "Inter", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+  --weight-heading: 700;
+  --weight-body:    400;
+
+  /* scale */
+  --scale-h1:    5.5rem;
+  --scale-h2:    3.25rem;
+  --scale-h3:    2.25rem;
+  --scale-body:  1.75rem;
+  --scale-small: 1.25rem;
+
+  /* layout */
+  --slide-padding: 5rem;
+  --slide-radius:  0;
+  --slide-bg-image: none;
+
+  /* shiki */
+  --shiki-theme: "min-light";
+}
+
+/* Subtle accent underline below H1 */
+.theme-minimal-sans .slide-canvas h1 {
+  letter-spacing: -0.025em;
+  padding-bottom: 1rem;
+  position: relative;
+  margin-bottom: 2rem;
+}
+.theme-minimal-sans .slide-canvas h1::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 6rem;
+  height: 4px;
+  background: var(--accent);
+}
+.theme-minimal-sans .slide-canvas h2 { color: var(--fg); letter-spacing: -0.015em; }
+.theme-minimal-sans .slide-canvas a { color: var(--accent); }
+.theme-minimal-sans .slide-canvas blockquote { border-left: 3px solid var(--accent); color: var(--fg-muted); }
