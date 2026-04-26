@@ -117,6 +117,119 @@ graph TD
   E -.edits.-> A
 \`\`\`
 
+# Bar chart
+
+\`\`\`chart
+type: bar
+title: Quarterly revenue
+data:
+  Q1: 12
+  Q2: 19
+  Q3: 8
+  Q4: 27
+\`\`\`
+
+# Line chart
+
+\`\`\`chart
+type: line
+title: Growth
+labels: [Jan, Feb, Mar, Apr, May, Jun]
+series:
+  Revenue: [10, 15, 14, 22, 30, 38]
+  Profit: [2, 4, 5, 9, 14, 19]
+\`\`\`
+
+# Pie chart
+
+\`\`\`chart
+type: pie
+title: Theme usage
+data:
+  Catppuccin Mocha: 38
+  Tokyo Night: 22
+  Dracula: 18
+  Other: 22
+\`\`\`
+
+# Donut chart
+
+\`\`\`chart
+type: donut
+title: Bundle composition
+data:
+  Application: 320
+  Shiki grammars: 410
+  Mermaid: 180
+  KaTeX: 90
+\`\`\`
+
+# Stat tiles
+
+:::stats
+- **17** Themes
+- **10** Layouts
+- **<500KB** Bundle (no images)
+- **0** Backend services
+:::
+
+# Callouts
+
+:::tip
+Prefer \`#\` over \`##\` for slide titles.
+:::
+
+:::warning Heads up
+Don't put metadata comments inside fenced code blocks.
+:::
+
+:::info
+KaTeX, Mermaid, and charts are pre-rendered on export.
+:::
+
+:::success
+Autosave is on by default. Your work is in IndexedDB.
+:::
+
+# Compare layout
+
+:::compare
+## Before
+- single CRUD table
+- no audit trail
+- one writer wins
+- migrations rewrite history
+
+## After
+- append-only events
+- complete audit trail
+- projections decoupled from writes
+- history is the source of truth
+:::
+
+# Timeline
+
+:::timeline
+- **2020** First sketch on a napkin
+- **2022** Internal demo
+- **2024** Open-sourced on GitHub
+- **2025** Hits 1k stars
+:::
+
+# Inline icons
+
+:icon[zap]: Fast · :icon[shield]: Secure · :icon[github]: Open source
+
+:icon[git-branch]: Branchable · :icon[zap]: Hot reload · :icon[lock]: Local-first · :icon[heart]: Made with care
+
+# Quote with attribution
+
+> Edit the markdown in this window.
+> The audience window updates in real time.
+> -- That is the whole pitch.
+
+This is the wedge. Everything else is supporting infrastructure for this single moment of feedback.
+
 # Images
 
 ![A scenic mountain photo](https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80)

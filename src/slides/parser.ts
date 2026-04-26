@@ -62,26 +62,18 @@ md.inline.ruler.after('emphasis', 'lucide_icon', (state, silent) => {
 md.renderer.rules.lucide_icon = (tokens, idx) =>
   `<span class="lucide-icon" data-icon="${tokens[idx].content.replace(/"/g, '&quot;')}"></span>`;
 
-// Chart fence — ```chart ... ``` produces a placeholder enhanced post-render.
-const origFence = md.renderer.rules.fence!;
-md.renderer.rules.fence = (tokens, idx, options, env, self) => {
+// Single fence handler covering: ```chart (custom SVG charts), ```mermaid
+// (handled later by renderMermaid), and all real code blocks (Shiki).
+md.renderer.rules.fence = (tokens, idx) => {
   const token = tokens[idx];
   const info = (token.info || '').trim();
   if (/^chart\b/.test(info)) {
     const encoded = encodeURIComponent(token.content);
     return `<div class="chart-block" data-chart="${encoded}"></div>`;
   }
-  return origFence(tokens, idx, options, env, self);
-};
-
-// Strip ```mermaid``` fences and code-fences from markdown-it default rendering;
-// we render code blocks ourselves in CodeBlock.tsx via a placeholder.
-md.renderer.rules.fence = (tokens, idx) => {
-  const token = tokens[idx];
-  const info = (token.info || '').trim();
-  // Encode as a custom div placeholder; CodeBlock component is rendered React-side.
-  // For markdown-it -> string usage (e.g. tests, export pre-render path), we still
-  // emit a <pre><code> fallback. The runtime renderSlide replaces these with React.
+  // Everything else (including mermaid) goes through the codeblock-placeholder
+  // pipeline — CodeBlock.tsx then either Shiki-highlights it or, for mermaid,
+  // converts it into a `.mermaid` div for renderMermaid to render.
   const langMatch = info.match(/^([\w-]+)/);
   const lang = langMatch ? langMatch[1] : '';
   const dataInfo = encodeURIComponent(info);

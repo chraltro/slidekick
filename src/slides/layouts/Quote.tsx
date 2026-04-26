@@ -3,13 +3,14 @@ import { splitQuote } from '../splitHtml';
 import { EnhancedHtml } from './EnhancedHtml';
 
 export default function QuoteLayout({ slide }: { slide: SlideAST }) {
-  const { quoteHtml, attribution, rest } = splitQuote(slide.html);
-  // Slide metadata can override / supply the attribution.
+  const { headerHtml, quoteHtml, attribution, rest } = splitQuote(slide.html);
   const finalAttribution = slide.meta.attribution ?? attribution;
-  // Strip empty whitespace-only "rest" so we don't show a tiny gap.
   const restHasContent = rest && rest.replace(/<[^>]+>/g, '').trim().length > 0;
   return (
     <div className="layout-quote">
+      {headerHtml && (
+        <div className="quote-header" dangerouslySetInnerHTML={{ __html: headerHtml }} />
+      )}
       <blockquote dangerouslySetInnerHTML={{ __html: quoteHtml ?? '' }} />
       {finalAttribution && <div className="attribution">{finalAttribution}</div>}
       {restHasContent && (

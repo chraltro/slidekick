@@ -23,8 +23,11 @@ export interface SplitColumnsParts {
 }
 
 export interface SplitQuoteParts {
+  /** Leading H1/H2 lifted out of the body to render above the quote. */
+  headerHtml?: string;
   quoteHtml?: string;
   attribution?: string;
+  /** Content after the blockquote (rendered as supporting commentary). */
   rest: string;
 }
 
@@ -126,6 +129,18 @@ export function splitColumns(html: string): SplitColumnsParts {
 
 export function splitQuote(html: string): SplitQuoteParts {
   const body = parse(html);
+  // Lift any leading H1/H2 out so the quote layout can render it as a slide
+  // header ABOVE the blockquote (otherwise it ends up below in `rest`).
+  let headerHtml: string | undefined;
+  for (const child of Array.from(body.childNodes)) {
+    if (child.nodeType !== 1) continue;
+    const el = child as Element;
+    if (el.tagName === 'H1' || el.tagName === 'H2') {
+      headerHtml = el.outerHTML;
+      el.remove();
+    }
+    break; // only consider the first non-text child
+  }
   const bq = body.querySelector('blockquote');
   let quoteHtml: string | undefined;
   let attribution: string | undefined;
@@ -161,7 +176,7 @@ export function splitQuote(html: string): SplitQuoteParts {
     quoteHtml = bq.innerHTML;
     bq.remove();
   }
-  return { quoteHtml, attribution, rest: body.innerHTML };
+  return { headerHtml, quoteHtml, attribution, rest: body.innerHTML };
 }
 
 function stripTags(s: string): string {
