@@ -4,6 +4,8 @@ import { renderMath } from '@/math/katex';
 import { renderMermaid } from '@/diagrams/mermaid';
 import { resolveAssetUrls } from '@/storage/assetStore';
 import { useUiStore } from '@/state/useUiStore';
+import { renderIcons } from '@/icons/renderIcons';
+import { renderCharts } from '@/charts/renderCharts';
 
 /**
  * Renders raw HTML and post-processes it: swaps codeblock placeholders for
@@ -24,6 +26,9 @@ export function EnhancedHtml({ html }: { html: string }) {
       // .mermaid divs that renderMermaid then renders, so it must run first.
       await enhanceCodeBlocks(el, codeTheme);
       if (cancelled) return;
+      // Synchronous enhancers — run immediately
+      renderIcons(el);
+      renderCharts(el);
       await Promise.all([
         renderMath(el),
         renderMermaid(el),

@@ -262,7 +262,7 @@ export function Toolbar({ onOpenAudience, audienceConnected }: Props) {
                 setExportMenuOpen(false);
               }}
               className="w-full text-left px-2 py-1.5 text-xs text-chrome-fg hover:bg-[#1d1d24] rounded inline-flex items-center gap-2"
-              title="Copy the agent guide to clipboard — paste it into Claude/GPT context to author decks for this tool"
+              title="Copy the agent guide to clipboard. Paste it into Claude/GPT context to author decks for this tool."
             >
               {guideCopied ? <Check size={12} /> : <BookOpen size={12} />}
               {guideCopied ? 'Copied!' : 'Copy agent guide'}

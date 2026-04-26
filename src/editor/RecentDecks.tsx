@@ -70,7 +70,7 @@ export function RecentDecks() {
         <div className="max-h-[480px] overflow-auto app-scroll">
           {decks.length === 0 && (
             <div className="px-4 py-8 text-sm text-chrome-muted text-center">
-              No saved decks yet. Start typing — autosave will keep your work.
+              No saved decks yet. Start typing - autosave will keep your work.
             </div>
           )}
           {decks.map((d) => (

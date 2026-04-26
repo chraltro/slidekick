@@ -95,6 +95,7 @@ Semicolon-separated keys (case-insensitive):
 | align    | left / center / right                               | Text alignment                             |
 | image    | url                                                 | Background image                           |
 | notes    | speaker note text (any length, can span lines)      | Speaker notes (only visible to presenter)  |
+| attribution | author name                                      | Attribution shown under a quote-layout slide |
 
 You can also use a separate notes-only comment:
 
@@ -161,13 +162,24 @@ The alt text becomes a caption pill in the bottom-left.
 **code-focus** — \`# Heading\` then a fenced code block. The code block
 fills the rest of the slide.
 
-**quote** — \`# Heading\` (optional) then a blockquote:
+**quote** — \`# Heading\` (optional) then a blockquote. Each \`>\` line
+renders as its own line on the slide (line breaks are preserved). For
+attribution, either start the last line with \`--\`, \`~\`, or use a
+metadata comment:
 
 \`\`\`md
 # Optional title
-> The actual quote, possibly multi-line.
-> Lines are joined with a space by Markdown.
+> The actual quote.
+> Multiple lines render as multiple lines.
+> -- Author Name
+
+# Or with metadata
+<!-- attribution: Author Name -->
+> The actual quote.
 \`\`\`
+
+If there's prose after the blockquote on the same slide, it renders
+underneath the attribution as supporting commentary.
 
 **section-divider** — write \`# Section name\` with no body. If it sits
 between two normal slides, it becomes a coloured break with large
@@ -323,6 +335,108 @@ If a slide is mostly one blockquote, it auto-picks the \`quote\` layout.
 
 Images can be HTTP(S) URLs, data URIs, or local \`asset:HASH\` references
 (produced when the user pastes an image into the editor).
+
+---
+
+## 8.5 Infographics (callouts, stats, compare, timeline, charts, icons)
+
+### Callout boxes
+
+\`\`\`md
+:::tip
+Always prefer \`#\` over \`##\` for slide titles.
+:::
+
+:::warning Look out
+Don't put metadata comments inside code fences.
+:::
+
+:::info
+KaTeX is pre-rendered on export.
+:::
+\`\`\`
+
+Six callout types: \`tip\`, \`info\`, \`note\`, \`warning\`, \`danger\`, \`success\`. Optional title goes after the type name on the opening line.
+
+### Stat / KPI grid
+
+\`\`\`md
+:::stats
+- **1000+** Stars
+- **17** Themes
+- **10** Layouts
+- **<500KB** Bundle
+:::
+\`\`\`
+
+The first \`**bold**\` text on each line becomes the big number; the rest is the label. Auto-fits 1-4 columns based on count.
+
+### Before / after comparison
+
+\`\`\`md
+:::compare
+## Before
+- single CRUD table
+- no audit trail
+
+## After
+- append-only events
+- full history
+:::
+\`\`\`
+
+Two columns side-by-side. The first H2 turns red-tinted, the second green-tinted.
+
+### Timeline
+
+\`\`\`md
+:::timeline
+- **2020** Started building
+- **2022** First public demo
+- **2024** Open-sourced
+:::
+\`\`\`
+
+Vertical timeline with dots and connector line. The first \`**bold**\` is highlighted as the date.
+
+### Inline icons
+
+\`:icon[name]:\` renders any [Lucide](https://lucide.dev) icon inline with the surrounding text:
+
+\`\`\`md
+:icon[zap]: Fast · :icon[shield]: Secure · :icon[github]: Open source
+\`\`\`
+
+Use \`kebab-case\` for multi-word names: \`:icon[git-branch]:\`, \`:icon[arrow-right]:\`.
+
+### Charts
+
+\`\`\`md
+\\\`\\\`\\\`chart
+type: bar
+title: Q4 Revenue
+data:
+  Q1: 12
+  Q2: 19
+  Q3: 8
+  Q4: 15
+\\\`\\\`\\\`
+\`\`\`
+
+Supported types: \`bar\`, \`line\`, \`pie\`, \`donut\`. For multi-series line charts:
+
+\`\`\`md
+\\\`\\\`\\\`chart
+type: line
+title: Growth
+labels: [Q1, Q2, Q3, Q4]
+series:
+  Revenue: [10, 15, 20, 28]
+  Profit: [2, 4, 6, 11]
+\\\`\\\`\\\`
+\`\`\`
+
+Charts render as inline SVG using theme colors automatically.
 
 ---
 

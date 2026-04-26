@@ -48,6 +48,8 @@ export interface SlideMeta {
   notes?: string;
   align?: 'left' | 'center' | 'right';
   image?: string;
+  /** Attribution shown under a quote-layout slide (overrides leading-dash detection). */
+  attribution?: string;
 }
 
 export interface SlideAST {

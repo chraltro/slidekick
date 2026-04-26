@@ -30,6 +30,7 @@
     "idb-keyval": "^6.2.1",
     "js-yaml": "^4.1.1",
     "katex": "^0.16.11",
+    "lucide": "^1.11.0",
     "lucide-react": "^1.11.0",
     "markdown-it": "^14.1.0",
     "markdown-it-attrs": "^4.3.1",

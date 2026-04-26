@@ -4,6 +4,9 @@ import MarkdownIt from 'markdown-it';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import mdAttrs from 'markdown-it-attrs';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import mdContainer from 'markdown-it-container';
 import type StateInline from 'markdown-it/lib/rules_inline/state_inline.mjs';
 import type { DeckConfig, ParsedDeck, SlideAST, SlideMeta, Layout } from './types';
 import { LAYOUTS } from './types';
@@ -13,8 +16,63 @@ const md: MarkdownIt = new MarkdownIt({
   html: true,
   linkify: true,
   typographer: true,
-  breaks: false,
+  // Single newlines in source become <br> in output. Authors typically write
+  // each thought on its own line in a presentation deck and expect that
+  // structure to be preserved on the slide. This is especially important
+  // inside blockquotes where multi-line quotes are common.
+  breaks: true,
 }).use(mdAttrs);
+
+// Container directives — ::: name ... :::
+// `stats` (KPI grid), `compare` (before/after), `timeline` (vertical),
+// callout boxes (`tip`, `warning`, `info`, `note`, `danger`, `success`).
+const CALLOUT_TYPES = ['tip', 'warning', 'info', 'note', 'danger', 'success'] as const;
+const STRUCTURAL_TYPES = ['stats', 'compare', 'timeline', 'columns'] as const;
+for (const type of [...CALLOUT_TYPES, ...STRUCTURAL_TYPES]) {
+  md.use(mdContainer, type, {
+    render(tokens: Array<{ nesting: number; info: string }>, idx: number) {
+      const t = tokens[idx];
+      if (t.nesting === 1) {
+        const info = t.info.trim().slice(type.length).trim();
+        const isCallout = (CALLOUT_TYPES as readonly string[]).includes(type);
+        const cls = isCallout ? `callout callout-${type}` : `infographic infographic-${type}`;
+        const titleAttr = info
+          ? ` data-title="${info.replace(/"/g, '&quot;')}"`
+          : '';
+        return `<div class="${cls}"${titleAttr}>\n`;
+      }
+      return '</div>\n';
+    },
+  });
+}
+
+// Inline icon rule — `:icon[name]:` → placeholder span enhanced post-render.
+md.inline.ruler.after('emphasis', 'lucide_icon', (state, silent) => {
+  const start = state.pos;
+  const src = state.src;
+  if (src[start] !== ':') return false;
+  const m = src.slice(start).match(/^:icon\[([\w-]+)\]:/);
+  if (!m) return false;
+  if (silent) return true;
+  const token = state.push('lucide_icon', 'span', 0);
+  token.content = m[1];
+  state.pos = start + m[0].length;
+  return true;
+});
+md.renderer.rules.lucide_icon = (tokens, idx) =>
+  `<span class="lucide-icon" data-icon="${tokens[idx].content.replace(/"/g, '&quot;')}"></span>`;
+
+// Chart fence — ```chart ... ``` produces a placeholder enhanced post-render.
+const origFence = md.renderer.rules.fence!;
+md.renderer.rules.fence = (tokens, idx, options, env, self) => {
+  const token = tokens[idx];
+  const info = (token.info || '').trim();
+  if (/^chart\b/.test(info)) {
+    const encoded = encodeURIComponent(token.content);
+    return `<div class="chart-block" data-chart="${encoded}"></div>`;
+  }
+  return origFence(tokens, idx, options, env, self);
+};
 
 // Strip ```mermaid``` fences and code-fences from markdown-it default rendering;
 // we render code blocks ourselves in CodeBlock.tsx via a placeholder.
@@ -311,6 +369,9 @@ export function parseSlideMeta(source: string): { meta: SlideMeta; cleaned: stri
           }
         } else if (key === 'image') {
           meta.image = val;
+          consumed = true;
+        } else if (key === 'attribution' || key === 'by') {
+          meta.attribution = val;
           consumed = true;
         } else if (key === 'notes') {
           notes = (notes ? notes + '\n' : '') + val;

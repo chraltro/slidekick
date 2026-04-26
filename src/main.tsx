@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles/globals.css';
 import './styles/slide-canvas.css';
+import './styles/infographics.css';
 import './themes/tokens.css';
 import { registerSW } from './pwa/registerSW';
 

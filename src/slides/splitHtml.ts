@@ -129,18 +129,43 @@ export function splitQuote(html: string): SplitQuoteParts {
   const bq = body.querySelector('blockquote');
   let quoteHtml: string | undefined;
   let attribution: string | undefined;
+
+  // Match common attribution prefixes: em-dash, en-dash, double-dash,
+  // double-hyphen-with-arrow, tilde, and "by".
+  const ATTRIB_RE = /^\s*(?:—|--|–|―|~|by\s+)\s*/i;
+
   if (bq) {
-    // Last paragraph inside the blockquote may be attribution if it starts with '—' or '--'.
     const ps = Array.from(bq.querySelectorAll('p'));
     const last = ps[ps.length - 1];
-    if (last && /^(—|--|–|―)/.test(last.textContent?.trim() ?? '')) {
-      attribution = last.textContent?.replace(/^(—|--|–|―)\s*/, '').trim();
-      last.remove();
+    if (last) {
+      // The last <p> may itself have multiple lines (joined by <br>). If the
+      // FINAL line of that paragraph matches an attribution prefix, extract
+      // it as attribution and keep the rest of the paragraph in the quote.
+      const fullText = last.innerHTML;
+      // Split on <br> to inspect last visible line.
+      const lines = fullText.split(/<br\s*\/?>/i);
+      const lastLine = (lines[lines.length - 1] ?? '').trim();
+      if (lastLine && ATTRIB_RE.test(stripTags(lastLine))) {
+        attribution = stripTags(lastLine).replace(ATTRIB_RE, '').trim();
+        if (lines.length === 1) {
+          last.remove();
+        } else {
+          last.innerHTML = lines.slice(0, -1).join('<br>').replace(/<br>\s*$/, '');
+        }
+      } else if (last && ATTRIB_RE.test(last.textContent ?? '')) {
+        // Whole last paragraph is attribution
+        attribution = (last.textContent ?? '').replace(ATTRIB_RE, '').trim();
+        last.remove();
+      }
     }
     quoteHtml = bq.innerHTML;
     bq.remove();
   }
   return { quoteHtml, attribution, rest: body.innerHTML };
+}
+
+function stripTags(s: string): string {
+  return s.replace(/<[^>]+>/g, '');
 }
 
 export function splitCode(html: string): SplitCodeParts {

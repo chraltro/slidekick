@@ -41,7 +41,7 @@ export function PresenterPanel({ onSetSlideLayout }: Props) {
     <div className="border-t border-chrome-border bg-chrome-surface/40 px-3 py-2 flex items-stretch gap-3">
       <div className="flex flex-col w-72">
         <div className="text-[10px] uppercase tracking-wider text-chrome-muted">
-          Slide {currentSlide + 1} / {total} — {slide?.layout ?? '—'}
+          Slide {currentSlide + 1} / {total} · {slide?.layout ?? '-'}
         </div>
         <div className="flex items-center gap-1 mt-1">
           <Button size="sm" variant="ghost" onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}>
@@ -62,7 +62,7 @@ export function PresenterPanel({ onSetSlideLayout }: Props) {
       <div className="flex-1 min-w-0">
         <div className="text-[10px] uppercase tracking-wider text-chrome-muted">Speaker notes</div>
         <div className="text-sm text-chrome-fg mt-1 whitespace-pre-wrap line-clamp-4 max-h-20 overflow-auto">
-          {slide?.notes ?? <span className="text-chrome-muted italic">No notes — add `&lt;!-- notes: ... --&gt;` in the slide.</span>}
+          {slide?.notes ?? <span className="text-chrome-muted italic">No notes. Add `&lt;!-- notes: ... --&gt;` in the slide.</span>}
         </div>
       </div>
 

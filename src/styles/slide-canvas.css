@@ -342,11 +342,11 @@
 }
 .layout-quote blockquote,
 .layout-quote blockquote p {
-  font-size: 3.5rem;
+  font-size: 2.8rem;
   font-style: italic;
   text-align: center;
   color: var(--fg, inherit);
-  line-height: 1.25;
+  line-height: 1.35;
 }
 .layout-quote blockquote {
   border-left: none;
@@ -355,17 +355,37 @@
   max-width: 1500px;
 }
 .layout-quote blockquote p {
-  margin: 0 0 0.4em 0;
+  margin: 0 0 0.7em 0;
+}
+.layout-quote blockquote p:last-child {
+  margin-bottom: 0;
 }
 .layout-quote .attribution {
-  margin-top: 2.5rem;
-  font-size: 1.6rem;
+  margin-top: 2rem;
+  font-size: 1.5rem;
   color: var(--fg-muted, currentColor);
   font-style: normal;
   letter-spacing: 0.05em;
+  font-weight: 500;
 }
 .layout-quote .attribution::before {
-  content: '— ';
+  content: '~ ';
+  opacity: 0.6;
+}
+.layout-quote .quote-rest {
+  margin-top: 2.5rem;
+  max-width: 1500px;
+  font-size: 1.5rem;
+  font-style: normal;
+  text-align: center;
+  color: var(--fg-muted, currentColor);
+  line-height: 1.5;
+}
+.layout-quote .quote-rest p {
+  font-size: inherit;
+  font-style: normal;
+  text-align: center;
+  margin: 0 0 0.6em 0;
 }
 
 .layout-section-divider {
