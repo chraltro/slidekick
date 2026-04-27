@@ -38,7 +38,7 @@ export function PresenterPanel({ onSetSlideLayout }: Props) {
   const total = parsed.slides.length;
 
   return (
-    <div className="border-t border-chrome-border bg-chrome-surface/40 px-3 py-2 flex items-stretch gap-3">
+    <div className="h-full border-t border-chrome-border bg-chrome-surface/40 px-3 py-2 flex items-stretch gap-3 min-h-0">
       <div className="flex flex-col w-72">
         <div className="text-[10px] uppercase tracking-wider text-chrome-muted">
           Slide {currentSlide + 1} / {total} · {slide?.layout ?? '-'}
@@ -59,9 +59,9 @@ export function PresenterPanel({ onSetSlideLayout }: Props) {
         </div>
       </div>
 
-      <div className="flex-1 min-w-0">
-        <div className="text-[10px] uppercase tracking-wider text-chrome-muted">Speaker notes</div>
-        <div className="text-sm text-chrome-fg mt-1 whitespace-pre-wrap line-clamp-4 max-h-20 overflow-auto">
+      <div className="flex-1 min-w-0 min-h-0 flex flex-col">
+        <div className="text-[10px] uppercase tracking-wider text-chrome-muted shrink-0">Speaker notes</div>
+        <div className="text-sm text-chrome-fg mt-1 whitespace-pre-wrap overflow-auto app-scroll min-h-0 flex-1">
           {slide?.notes ?? <span className="text-chrome-muted italic">No notes. Add `&lt;!-- notes: ... --&gt;` in the slide.</span>}
         </div>
       </div>

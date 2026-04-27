@@ -3,6 +3,7 @@ import { Toolbar } from './Toolbar';
 import { ThumbnailRail } from './ThumbnailRail';
 import { PresenterPanel } from './PresenterPanel';
 import CodeMirrorEditor from './CodeMirrorEditor';
+import { DragHandle, useContainerSize, usePersistedSize } from './SplitPane';
 import { SlideStage } from '@/slides/SlideStage';
 import { useDeckStore } from '@/state/useDeckStore';
 import { useUiStore } from '@/state/useUiStore';
@@ -90,6 +91,33 @@ export default function EditorApp() {
 
   const slide = parsed.slides[currentSlide] ?? null;
 
+  // Resizable panes. Sizes persist to localStorage via usePersistedSize.
+  // Editor + thumbnail rail are pixel-sized; the preview pane absorbs the
+  // remainder via `1fr`. Presenter panel height is also pixel-sized.
+  const mainRef = useRef<HTMLDivElement | null>(null);
+  const { width: mainWidth, height: mainHeight } = useContainerSize(mainRef);
+  const [editorW, setEditorW] = usePersistedSize('editor', 520);
+  const [thumbsW, setThumbsW] = usePersistedSize('thumbs', 220);
+  const [presenterH, setPresenterH] = usePersistedSize('presenter', 120);
+
+  // Clamp sizes to keep the preview from collapsing below 280px.
+  function clampEditor(next: number): number {
+    const minEditor = 240;
+    const minPreview = 280;
+    const maxEditor = Math.max(minEditor, mainWidth - thumbsW - minPreview);
+    return Math.max(minEditor, Math.min(maxEditor, next));
+  }
+  function clampThumbs(next: number): number {
+    const minThumbs = 0;
+    const maxThumbs = Math.max(minThumbs, mainWidth - editorW - 280);
+    return Math.max(minThumbs, Math.min(maxThumbs, next));
+  }
+  function clampPresenter(next: number): number {
+    const minH = 0;
+    const maxH = Math.max(minH, mainHeight - 240);
+    return Math.max(minH, Math.min(maxH, next));
+  }
+
   if (isPresenting) {
     return (
       <div className="fixed inset-0 bg-black">
@@ -109,10 +137,16 @@ export default function EditorApp() {
   }
 
   return (
-    <div ref={editorRootRef} className="grid h-full grid-rows-[auto_1fr_auto] bg-chrome-bg overflow-hidden">
+    <div ref={editorRootRef} className="grid h-full grid-rows-[auto_1fr_1px_auto] bg-chrome-bg overflow-hidden">
       <Toolbar onOpenAudience={openAudience} audienceConnected={audienceConnected} />
-      <div className="grid grid-cols-[minmax(320px,1fr)_minmax(0,1.6fr)_220px] min-h-0 overflow-hidden">
-        <div className="border-r border-chrome-border min-h-0 min-w-0 flex flex-col">
+      <div
+        ref={mainRef}
+        className="grid min-h-0 overflow-hidden"
+        style={{
+          gridTemplateColumns: `${clampEditor(editorW)}px 1px minmax(280px, 1fr) 1px ${clampThumbs(thumbsW)}px`,
+        }}
+      >
+        <div className="min-h-0 min-w-0 flex flex-col">
           <CodeMirrorEditor
             value={source}
             onChange={setSource}
@@ -120,6 +154,11 @@ export default function EditorApp() {
             onCursorSlide={(idx) => setCurrentSlide(idx)}
           />
         </div>
+        <DragHandle
+          orientation="col"
+          getStart={() => editorW}
+          onDrag={(next) => setEditorW(clampEditor(next))}
+        />
         <div className="min-h-0 min-w-0 bg-chrome-bg flex items-center justify-center p-6">
           <div className="w-full h-full max-w-full max-h-full flex items-center justify-center">
             <div
@@ -139,11 +178,25 @@ export default function EditorApp() {
             </div>
           </div>
         </div>
-        <div className="border-l border-chrome-border min-h-0">
+        <DragHandle
+          orientation="col"
+          direction={-1}
+          getStart={() => thumbsW}
+          onDrag={(next) => setThumbsW(clampThumbs(next))}
+        />
+        <div className="min-h-0 overflow-hidden">
           <ThumbnailRail />
         </div>
       </div>
-      <PresenterPanel onSetSlideLayout={setSlideLayout} />
+      <DragHandle
+        orientation="row"
+        direction={-1}
+        getStart={() => presenterH}
+        onDrag={(next) => setPresenterH(clampPresenter(next))}
+      />
+      <div style={{ height: clampPresenter(presenterH) }} className="min-h-0 overflow-hidden">
+        <PresenterPanel onSetSlideLayout={setSlideLayout} />
+      </div>
       <SlideJumper />
       <Overview />
       <RecentDecks />
