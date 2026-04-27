@@ -71,11 +71,11 @@ export function SlideJumper() {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[2000] flex items-start justify-center pt-24 bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[2000] flex items-start justify-center pt-24 bg-black/50 backdrop-blur-sm"
       onClick={() => setOpen(false)}
     >
       <div
-        className="w-[640px] max-w-[90vw] bg-chrome-surface border border-chrome-border rounded-lg shadow-2xl overflow-hidden"
+        className="w-[640px] max-w-[90vw] bg-chrome-elevated border border-chrome-border rounded-lg shadow-2xl shadow-black/50 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <input
@@ -99,9 +99,9 @@ export function SlideJumper() {
             }
           }}
           placeholder="Jump to slide…"
-          className="w-full px-4 py-3 bg-transparent border-b border-chrome-border text-base text-chrome-fg placeholder:text-chrome-muted outline-none"
+          className="w-full px-4 py-3 bg-transparent border-b border-chrome-border text-base text-chrome-fg placeholder:text-chrome-subtle outline-none"
         />
-        <div className="max-h-[420px] overflow-auto app-scroll">
+        <div className="max-h-[420px] overflow-auto app-scroll py-1">
           {filtered.length === 0 && (
             <div className="px-4 py-6 text-sm text-chrome-muted">No slides match.</div>
           )}
@@ -110,23 +110,32 @@ export function SlideJumper() {
               key={r.slide.hash + r.i}
               onClick={() => jump(r.i)}
               onMouseEnter={() => setActive(idx)}
-              className={`w-full text-left px-4 py-2 flex items-center justify-between gap-3 ${
-                idx === active ? 'bg-chrome-accent/15' : ''
+              className={`w-full text-left px-4 py-2 flex items-center justify-between gap-3 transition-colors ${
+                idx === active ? 'bg-chrome-accent/10 text-chrome-fg' : 'text-chrome-fg/90'
               }`}
             >
-              <span className="text-chrome-muted text-xs w-8 shrink-0">{r.i + 1}</span>
-              <span className="flex-1 truncate text-chrome-fg text-sm">
-                {r.slide.title ?? <span className="opacity-50 italic">untitled slide</span>}
+              <span className={`font-mono text-[11px] w-8 shrink-0 tabular-nums ${idx === active ? 'text-chrome-accent' : 'text-chrome-subtle'}`}>
+                {String(r.i + 1).padStart(2, '0')}
               </span>
-              <span className="text-[10px] uppercase tracking-wider text-chrome-muted shrink-0">
+              <span className="flex-1 truncate text-sm">
+                {r.slide.title ?? <span className="text-chrome-subtle italic">untitled slide</span>}
+              </span>
+              <span className="text-[10px] uppercase tracking-[0.08em] font-medium text-chrome-subtle shrink-0">
                 {r.slide.layout}
               </span>
             </button>
           ))}
         </div>
-        <div className="px-4 py-2 text-xs text-chrome-muted border-t border-chrome-border flex items-center justify-between">
-          <span>↑↓ navigate · ↵ jump · Esc close</span>
-          <span>{filtered.length} slide{filtered.length === 1 ? '' : 's'}</span>
+        <div className="px-4 py-2 text-[11px] text-chrome-muted border-t border-chrome-border flex items-center justify-between bg-chrome-surface/50">
+          <span className="flex items-center gap-2">
+            <kbd className="px-1.5 py-0.5 rounded bg-chrome-bg border border-chrome-border font-mono text-[10px] text-chrome-fg">↑↓</kbd>
+            navigate
+            <kbd className="px-1.5 py-0.5 rounded bg-chrome-bg border border-chrome-border font-mono text-[10px] text-chrome-fg ml-1">↵</kbd>
+            jump
+            <kbd className="px-1.5 py-0.5 rounded bg-chrome-bg border border-chrome-border font-mono text-[10px] text-chrome-fg ml-1">Esc</kbd>
+            close
+          </span>
+          <span className="tabular-nums">{filtered.length} slide{filtered.length === 1 ? '' : 's'}</span>
         </div>
       </div>
     </div>,

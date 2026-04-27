@@ -153,21 +153,21 @@ export function Toolbar({ onOpenAudience, audienceConnected }: Props) {
   }
 
   return (
-    <div className="flex items-center justify-between px-3 py-2 border-b border-chrome-border bg-chrome-surface/60 backdrop-blur">
-      <div className="flex items-center gap-2 min-w-0">
-        <div className="font-mono text-sm text-chrome-accent shrink-0">md-pres</div>
-        <span className="text-chrome-border">|</span>
+    <div className="flex items-center justify-between gap-3 px-3 py-2 border-b border-chrome-border bg-chrome-surface/60 backdrop-blur">
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="font-mono text-sm text-chrome-accent shrink-0 tracking-tight">md-pres</div>
+        <div className="h-4 w-px bg-chrome-border shrink-0" aria-hidden />
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="bg-transparent text-sm text-chrome-fg outline-none border-none px-1 truncate min-w-0"
+          className="bg-transparent text-sm text-chrome-fg placeholder:text-chrome-subtle outline-none border-none px-1.5 py-0.5 -mx-1.5 rounded truncate min-w-0 transition-colors hover:bg-chrome-surface focus:bg-chrome-surface focus-visible:ring-1 focus-visible:ring-chrome-accent/50"
           placeholder="Untitled"
         />
         {dirty ? (
-          <span className="text-[10px] uppercase tracking-wider text-amber-400">Unsaved</span>
+          <span className="text-[10px] uppercase tracking-[0.08em] font-medium text-amber-400/90 shrink-0">Unsaved</span>
         ) : (
-          <span className="text-[10px] uppercase tracking-wider text-chrome-muted flex items-center gap-1">
-            <Save size={10} /> saved
+          <span className="text-[10px] uppercase tracking-[0.08em] font-medium text-chrome-subtle flex items-center gap-1 shrink-0">
+            <Save size={10} /> Saved
           </span>
         )}
       </div>
@@ -225,9 +225,9 @@ export function Toolbar({ onOpenAudience, audienceConnected }: Props) {
         createPortal(
           <div
             ref={exportMenuRef}
-            className="fixed bg-chrome-surface border border-chrome-border rounded-md shadow-2xl p-1"
+            className="fixed bg-chrome-elevated border border-chrome-border rounded-lg shadow-xl shadow-black/40 p-1"
             style={{
-              top: exportAnchor.bottom + 8,
+              top: exportAnchor.bottom + 6,
               left: Math.max(8, Math.min(window.innerWidth - 232, exportAnchor.right - 224)),
               width: 224,
               zIndex: 1000,
@@ -235,21 +235,21 @@ export function Toolbar({ onOpenAudience, audienceConnected }: Props) {
           >
             <button
               onClick={handleExportHtml}
-              className="w-full text-left px-2 py-1.5 text-xs text-chrome-fg hover:bg-[#1d1d24] rounded inline-flex items-center gap-2"
+              className="w-full text-left px-2.5 py-1.5 text-xs text-chrome-fg hover:bg-chrome-surface-hover rounded-md inline-flex items-center gap-2.5 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-chrome-accent"
             >
-              <FileText size={12} /> HTML (self-contained)
+              <FileText size={12} className="text-chrome-muted" /> HTML (self-contained)
             </button>
             <button
               onClick={handleExportPdf}
-              className="w-full text-left px-2 py-1.5 text-xs text-chrome-fg hover:bg-[#1d1d24] rounded inline-flex items-center gap-2"
+              className="w-full text-left px-2.5 py-1.5 text-xs text-chrome-fg hover:bg-chrome-surface-hover rounded-md inline-flex items-center gap-2.5 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-chrome-accent"
             >
-              <FileDown size={12} /> PDF (via print)
+              <FileDown size={12} className="text-chrome-muted" /> PDF (via print)
             </button>
             <button
               onClick={handleExportMd}
-              className="w-full text-left px-2 py-1.5 text-xs text-chrome-fg hover:bg-[#1d1d24] rounded inline-flex items-center gap-2"
+              className="w-full text-left px-2.5 py-1.5 text-xs text-chrome-fg hover:bg-chrome-surface-hover rounded-md inline-flex items-center gap-2.5 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-chrome-accent"
             >
-              <Save size={12} /> Markdown source (.md)
+              <Save size={12} className="text-chrome-muted" /> Markdown source (.md)
             </button>
             <div className="my-1 h-px bg-chrome-border" />
             <button
@@ -261,10 +261,10 @@ export function Toolbar({ onOpenAudience, audienceConnected }: Props) {
                 }
                 setExportMenuOpen(false);
               }}
-              className="w-full text-left px-2 py-1.5 text-xs text-chrome-fg hover:bg-[#1d1d24] rounded inline-flex items-center gap-2"
+              className="w-full text-left px-2.5 py-1.5 text-xs text-chrome-fg hover:bg-chrome-surface-hover rounded-md inline-flex items-center gap-2.5 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-chrome-accent"
               title="Copy the agent guide to clipboard. Paste it into Claude/GPT context to author decks for this tool."
             >
-              {guideCopied ? <Check size={12} /> : <BookOpen size={12} />}
+              {guideCopied ? <Check size={12} className="text-emerald-400" /> : <BookOpen size={12} className="text-chrome-muted" />}
               {guideCopied ? 'Copied!' : 'Copy agent guide'}
             </button>
           </div>,
