@@ -129,4 +129,43 @@ test.describe('custom themes', () => {
     );
     expect(bg).toBe('rgb(18, 4, 88)'); // #120458
   });
+
+  test('font fields are dropdowns with an "Other" custom escape hatch', async ({ page }) => {
+    test.setTimeout(120000);
+    await page.goto('/');
+    await expect(page.locator('.cm-editor')).toBeVisible();
+    await expect(page.locator('.slide-canvas').first()).toBeVisible();
+
+    await openPicker(page);
+    await page.getByRole('button', { name: /create new theme/i }).click();
+    await expect(page.getByTestId('theme-editor')).toBeVisible();
+
+    // category + shiki + heading + body + mono = 5 selects.
+    const selects = page.locator('[data-testid="theme-editor"] select');
+    await expect(selects).toHaveCount(5);
+
+    // Pick a preset heading font and verify the preview h1 picks it up.
+    const headingFont = selects.nth(2);
+    await headingFont.selectOption({ label: 'Georgia' });
+    await expect
+      .poll(() =>
+        page
+          .locator('[data-testid="theme-editor"] .slide-canvas h1')
+          .evaluate((el) => getComputedStyle(el).fontFamily),
+      )
+      .toContain('Georgia');
+
+    // Switch to "Other" and type a custom stack; the field appears and applies.
+    await headingFont.selectOption('__other__');
+    const custom = page.locator('[data-testid="theme-editor"] input[placeholder*="My Font"]').first();
+    await expect(custom).toBeVisible();
+    await custom.fill('"Brush Script MT", cursive');
+    await expect
+      .poll(() =>
+        page
+          .locator('[data-testid="theme-editor"] .slide-canvas h1')
+          .evaluate((el) => getComputedStyle(el).fontFamily),
+      )
+      .toContain('Brush Script MT');
+  });
 });
