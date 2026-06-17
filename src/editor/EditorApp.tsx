@@ -15,7 +15,6 @@ import { useImagePaste } from './useImagePaste';
 import { SlideJumper } from './SlideJumper';
 import { Overview } from './Overview';
 import { RecentDecks } from './RecentDecks';
-import { ThemeTweaker } from './ThemeTweaker';
 import { DrawOverlay } from './DrawOverlay';
 import type { Layout } from '@/slides/types';
 
@@ -200,7 +199,6 @@ export default function EditorApp() {
       <SlideJumper />
       <Overview />
       <RecentDecks />
-      <ThemeTweaker />
     </div>
   );
 }

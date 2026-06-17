@@ -12,6 +12,8 @@ import { renderMath } from '@/math/katex';
 import { renderMermaid } from '@/diagrams/mermaid';
 import { getAssetDataUri } from '@/storage/assetStore';
 import { shikiThemeFor } from '@/code/themeMap';
+import { ensureCustomThemesLoaded, getLoadedCustomThemes } from '@/themes/useCustomThemes';
+import { themeToCss } from '@/themes/customThemes';
 
 // The bundler turns these `?inline` imports into raw CSS strings at build time.
 import tokensCssRaw from '@/themes/tokens.css?inline';
@@ -31,7 +33,10 @@ import infographicsCssRaw from '@/styles/infographics.css?inline';
  */
 export async function exportDeckHtml(deck: ParsedDeck, title: string): Promise<string> {
   const themeId = deck.config.theme;
-  const codeTheme = deck.config.codeTheme ?? shikiThemeFor(themeId);
+  // Make sure custom themes are loaded so we can resolve their code theme + CSS.
+  await ensureCustomThemesLoaded();
+  const customTheme = getLoadedCustomThemes().find((t) => t.id === themeId);
+  const codeTheme = deck.config.codeTheme ?? customTheme?.shikiTheme ?? shikiThemeFor(themeId);
 
   // Off-screen host. Position far off-screen (rather than display:none) so that
   // layout-dependent rendering — Mermaid measuring text, KaTeX, etc. — sees a
@@ -62,14 +67,20 @@ export async function exportDeckHtml(deck: ParsedDeck, title: string): Promise<s
 
   const combined = slideHtmls.join('\n');
 
-  // Theme CSS — all themes are bundled via import.meta.glob with `?inline`.
-  const themeCssMap = import.meta.glob('@/themes/*.css', {
-    query: '?inline',
-    import: 'default',
-    eager: true,
-  }) as Record<string, string>;
-  const themeFile = Object.entries(themeCssMap).find(([k]) => k.endsWith(`/${themeId}.css`));
-  const themeCss = themeFile ? themeFile[1] : '';
+  // Theme CSS — built-in themes are bundled via import.meta.glob with `?inline`;
+  // a custom theme generates its CSS from the stored variable bundle.
+  let themeCss = '';
+  if (customTheme) {
+    themeCss = themeToCss(customTheme);
+  } else {
+    const themeCssMap = import.meta.glob('@/themes/*.css', {
+      query: '?inline',
+      import: 'default',
+      eager: true,
+    }) as Record<string, string>;
+    const themeFile = Object.entries(themeCssMap).find(([k]) => k.endsWith(`/${themeId}.css`));
+    themeCss = themeFile ? themeFile[1] : '';
+  }
 
   // Best-effort KaTeX CSS — only inlined when the deck actually uses math.
   let katexCss = '';

@@ -1,14 +1,22 @@
 import { useEffect } from 'react';
+import { useCustomThemes } from './useCustomThemes';
 
 /**
- * All theme CSS files are bundled eagerly so theme switching is instant —
- * we just toggle the `.theme-<id>` class on the slide canvas root via
- * RenderSlide's className. This hook additionally injects optional user
- * customCss into a single <style id="user-custom-css"> tag.
+ * All built-in theme CSS files are bundled eagerly so theme switching is
+ * instant — we just toggle the `.theme-<id>` class on the slide canvas root via
+ * RenderSlide's className. Custom (user) themes are injected at runtime by the
+ * custom-theme registry; subscribing to it here keeps the `<style>` tag present
+ * in whichever window uses this hook (editor + audience).
+ *
+ * This hook additionally injects optional per-deck customCss into a single
+ * <style id="user-custom-css"> tag.
  */
 import.meta.glob('./*.css', { eager: true });
 
 export function useThemeLoader(_themeId: string, customCss?: string) {
+  // Subscribe so custom themes load + inject their CSS in this window.
+  useCustomThemes();
+
   useEffect(() => {
     const id = 'user-custom-css';
     let style = document.getElementById(id) as HTMLStyleElement | null;
