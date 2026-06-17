@@ -160,43 +160,51 @@ test.describe('cursor → slide mapping', () => {
 
     // Drive the cursor through the doc using page.evaluate so we don't rely on
     // CodeMirror virtualization (out-of-viewport lines aren't in DOM).
-    // Match against the default deck's structure: each heading lands on its
-    // own slide; use indexOf in the doc to find them at runtime.
-    const headings = [
-      '# md-presentations',
-      '# Why this exists',
-      '# Part 1',
-      '# Title layout',
-      '# Content layout',
-      '# Two columns',
-      '# Code focus',
-      '# Quote layout',
-      '# Section break',
-      '# Part 2',
-      '# Math',
-      '# Diagrams',
-      '# Themes',
-      '# Speaker notes',
-      '# Keyboard shortcuts',
-      '# Live edit, while presenting',
-      '# Export',
-      '# Thanks',
-    ];
+    // Derive the H1 headings (the only default slide boundary) from the live
+    // document so the test never drifts out of sync with the sample deck.
+    const headings = await page.evaluate(() => {
+      const v = (window as unknown as { __cmView?: any }).__cmView;
+      if (!v) throw new Error('CodeMirror view not exposed on window');
+      const text: string = v.state.doc.toString();
+      const lines = text.split('\n');
+      let inFence = false;
+      const out: string[] = [];
+      for (const line of lines) {
+        const t = line.trim();
+        if (/^(`{3,}|~{3,})/.test(t)) {
+          inFence = !inFence;
+          continue;
+        }
+        if (inFence) continue;
+        if (/^#\s+\S/.test(t) && !/^##/.test(t)) out.push(line);
+      }
+      return out;
+    });
+    expect(headings.length).toBeGreaterThanOrEqual(5);
 
+    // Placing the cursor on each successive H1 line should select a slide whose
+    // index advances monotonically down the document. We assert monotonic
+    // advance (not a fixed index per heading) because the default deck also
+    // contains `***` breaks that create H1-less slides, so the H1 list is not
+    // 1:1 with slide indices. The first H1 must map to slide 0.
+    let lastIdx = -1;
     for (let i = 0; i < headings.length; i++) {
       const heading = headings[i];
       await page.evaluate((needle) => {
         const v = (window as unknown as { __cmView?: any }).__cmView;
         if (!v) throw new Error('CodeMirror view not exposed on window');
         const text = v.state.doc.toString();
-        const idx = text.indexOf(needle);
-        if (idx === -1) throw new Error('heading not found: ' + needle);
-        v.dispatch({ selection: { anchor: idx + 2 } });
+        const at = text.indexOf('\n' + needle + '\n');
+        const pos = at === -1 ? text.indexOf(needle) : at + 1;
+        if (pos === -1) throw new Error('heading not found: ' + needle);
+        v.dispatch({ selection: { anchor: pos + 2 } });
         v.focus();
       }, heading);
       await page.waitForTimeout(120);
-      const idx = await page.locator('.slide-canvas').first().getAttribute('data-slide-index');
-      expect({ heading, idx }).toEqual({ heading, idx: String(i) });
+      const idx = Number(await page.locator('.slide-canvas').first().getAttribute('data-slide-index'));
+      if (i === 0) expect(idx).toBe(0);
+      expect({ heading, advanced: idx > lastIdx }).toEqual({ heading, advanced: true });
+      lastIdx = idx;
     }
   });
 });
@@ -206,7 +214,9 @@ test.describe('export', () => {
     await page.goto('/');
     await expect(page.locator('.cm-editor')).toBeVisible();
     const downloadPromise = page.waitForEvent('download');
+    // The Export button opens a menu; pick the self-contained HTML option.
     await page.getByRole('button', { name: /^export$/i }).click();
+    await page.getByRole('button', { name: /HTML \(self-contained\)/i }).click();
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toMatch(/\.html$/);
   });

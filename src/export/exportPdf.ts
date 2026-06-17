@@ -12,13 +12,13 @@ export async function exportDeckPdf(deck: ParsedDeck, title: string): Promise<vo
   const printableHtml = html.replace(
     '</head>',
     `<style media="print">
-      @page { size: ${deck.config.aspect === '4:3' ? '14.4in 10.8in' : '19.2in 10.8in'}; margin: 0; }
-      html, body { background: #000 !important; }
-      #stage { display: block !important; position: static !important; }
-      #scaler { transform: none !important; position: static !important; display: block !important; }
-      .slide { display: block !important; page-break-after: always; page-break-inside: avoid; break-after: page; }
-      .slide:last-child { page-break-after: auto; }
-      .footer-controls { display: none !important; }
+      @page { size: ${deck.config.aspect === '4:3' ? '14.4in 10.8in' : deck.config.aspect === '1:1' ? '10.8in 10.8in' : '19.2in 10.8in'}; margin: 0; }
+      html, body { background: #000 !important; overflow: visible !important; }
+      #stage { display: block !important; position: static !important; inset: auto !important; overflow: visible !important; }
+      #scaler { transform: none !important; position: static !important; display: block !important; top: auto !important; left: auto !important; }
+      #scaler > .slide, #scaler > .slide.is-active { display: block !important; page-break-after: always; page-break-inside: avoid; break-after: page; }
+      #scaler > .slide:last-child { page-break-after: auto; }
+      .footer-controls, #progress, #overview { display: none !important; }
     </style>
     <script>window.addEventListener('load', () => setTimeout(() => window.print(), 400));</script>
     </head>`,

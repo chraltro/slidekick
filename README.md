@@ -159,17 +159,26 @@ Features: language label, copy button, line highlighting via `{1,3-5}`, optional
 
 ## Export
 
-`Cmd/Ctrl+E` produces a single self-contained HTML file:
+`Cmd/Ctrl+E` produces a single self-contained HTML file. It is rendered with the
+exact same React layout components and post-processors the live editor uses, so
+the export is pixel-identical to the preview, never a separate, drifting code
+path:
 
-- All slides as static HTML.
-- Active theme + base CSS inlined.
-- Shiki pre-rendered (no runtime).
-- KaTeX pre-rendered, CSS inlined.
+- All slides as static HTML, with full per-layout structure (title/subtitle,
+  two-column splits, quote + attribution, image layouts, code-focus, etc.).
+- Active theme + base CSS + infographics CSS inlined.
+- Shiki pre-rendered (no runtime), with line highlighting and mac/title chrome.
+- KaTeX pre-rendered, CSS inlined only when the deck uses math.
 - Mermaid pre-rendered to inline SVG.
-- Images inlined as `data:` URIs.
-- ~3KB navigation runtime (arrows, B/W blank, F fullscreen, `?slide=N` deep-link).
+- Charts and lucide icons pre-rendered to inline SVG.
+- Local (`asset:`) images inlined as `data:` URIs; remote `http(s)` images are
+  fetched and inlined best-effort so the file works fully offline.
+- Small navigation runtime: arrow / space / PgUp-Dn / Home / End / `1-9`,
+  B/W blank, F fullscreen, O overview grid, click and swipe to advance, a theme
+  progress bar, working Copy buttons, and a `?slide=N` deep-link.
 
-Target: <500KB for a typical 20-slide text-and-code deck.
+Any single slide that fails to render falls back to a minimal title card rather
+than aborting the whole export.
 
 ## Storage
 
