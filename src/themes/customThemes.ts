@@ -12,7 +12,7 @@ import type { ThemeInfo } from './index';
  */
 
 /** The tweakable CSS variables, in display order. Keep in sync with tokens.css. */
-export const THEME_VARS: { key: string; label: string; type: 'color' | 'length' | 'text'; group: string }[] = [
+export const THEME_VARS: { key: string; label: string; type: 'color' | 'length' | 'text' | 'font'; group: string }[] = [
   { key: '--bg', label: 'Background', type: 'color', group: 'Surfaces' },
   { key: '--bg-alt', label: 'Background (alt)', type: 'color', group: 'Surfaces' },
   { key: '--fg', label: 'Text', type: 'color', group: 'Surfaces' },
@@ -23,9 +23,9 @@ export const THEME_VARS: { key: string; label: string; type: 'color' | 'length' 
   { key: '--code-bg', label: 'Code background', type: 'color', group: 'Code' },
   { key: '--code-fg', label: 'Code text', type: 'color', group: 'Code' },
   { key: '--code-border', label: 'Code border', type: 'color', group: 'Code' },
-  { key: '--font-heading', label: 'Heading font', type: 'text', group: 'Type' },
-  { key: '--font-body', label: 'Body font', type: 'text', group: 'Type' },
-  { key: '--font-mono', label: 'Mono font', type: 'text', group: 'Type' },
+  { key: '--font-heading', label: 'Heading font', type: 'font', group: 'Type' },
+  { key: '--font-body', label: 'Body font', type: 'font', group: 'Type' },
+  { key: '--font-mono', label: 'Mono font', type: 'font', group: 'Type' },
   { key: '--weight-heading', label: 'Heading weight', type: 'text', group: 'Type' },
   { key: '--scale-h1', label: 'H1 size', type: 'length', group: 'Scale' },
   { key: '--scale-h2', label: 'H2 size', type: 'length', group: 'Scale' },
@@ -37,6 +37,53 @@ export const THEME_VARS: { key: string; label: string; type: 'color' | 'length' 
 ];
 
 export type ThemeVars = Record<string, string>;
+
+/**
+ * Curated font-stack presets for the theme editor's font dropdowns.
+ *
+ * The app does not bundle any web fonts: a theme references font *names* and
+ * relies on the viewer having them, with fallbacks. So every preset below ends
+ * in a generic family (sans-serif/serif/monospace) and leads with names that
+ * are either common system fonts or the named fonts the built-in themes already
+ * use — guaranteeing something sensible renders everywhere. Users who want a
+ * specific (e.g. self-hosted or Google) font can still pick "Other…" and type
+ * an exact stack.
+ */
+export interface FontPreset {
+  /** Human label shown in the dropdown. */
+  label: string;
+  /** The exact CSS font-family value stored in the theme. */
+  value: string;
+  /** 'sans' | 'serif' offered for heading/body; 'mono' offered for code. */
+  kind: 'sans' | 'serif' | 'mono';
+}
+
+export const FONT_STACKS: FontPreset[] = [
+  // Sans-serif
+  { label: 'Inter', value: '"Inter", system-ui, sans-serif', kind: 'sans' },
+  { label: 'System UI (native)', value: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif', kind: 'sans' },
+  { label: 'Helvetica / Arial', value: '"Helvetica Neue", Helvetica, Arial, sans-serif', kind: 'sans' },
+  { label: 'Verdana', value: 'Verdana, Geneva, sans-serif', kind: 'sans' },
+  { label: 'Trebuchet MS', value: '"Trebuchet MS", system-ui, sans-serif', kind: 'sans' },
+  // Serif
+  { label: 'Georgia', value: 'Georgia, "Times New Roman", serif', kind: 'serif' },
+  { label: 'Times New Roman', value: '"Times New Roman", Times, serif', kind: 'serif' },
+  { label: 'Spectral / Source Serif', value: '"Spectral", "Source Serif Pro", Georgia, serif', kind: 'serif' },
+  { label: 'Palatino', value: '"Palatino Linotype", "Book Antiqua", Palatino, serif', kind: 'serif' },
+  { label: 'Computer Modern (LaTeX)', value: '"Computer Modern Serif", "Latin Modern Roman", "Times New Roman", serif', kind: 'serif' },
+  // Handwritten / display (sensible to use for headings)
+  { label: 'Caveat (handwritten)', value: '"Caveat", "Comic Sans MS", cursive', kind: 'sans' },
+  // Monospace
+  { label: 'JetBrains Mono', value: '"JetBrains Mono", ui-monospace, monospace', kind: 'mono' },
+  { label: 'System mono', value: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace', kind: 'mono' },
+  { label: 'Fira Code', value: '"Fira Code", ui-monospace, monospace', kind: 'mono' },
+  { label: 'Courier New', value: '"Courier New", Courier, monospace', kind: 'mono' },
+];
+
+/** Which kinds of preset apply to a given font variable. */
+export function fontKindsFor(varKey: string): FontPreset['kind'][] {
+  return varKey === '--font-mono' ? ['mono'] : ['sans', 'serif'];
+}
 
 export interface CustomTheme {
   /** Stable, slug-like id used in the `.theme-<id>` selector and frontmatter. */

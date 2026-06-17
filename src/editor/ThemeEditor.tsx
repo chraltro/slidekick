@@ -6,6 +6,8 @@ import {
   type ThemeVars,
   THEME_VARS,
   DEFAULT_THEME_VARS,
+  FONT_STACKS,
+  fontKindsFor,
   slugify,
   themeToCss,
   serializeTheme,
@@ -240,32 +242,43 @@ export function ThemeEditor({ editingId, onClose, onSaved }: Props) {
               <div key={group}>
                 <div className="text-[10px] uppercase tracking-wider text-chrome-muted mb-1.5">{group}</div>
                 <div className="space-y-1.5">
-                  {items.map((v) => (
-                    <div key={v.key} className="flex items-center justify-between gap-2 text-xs text-chrome-fg">
-                      <span className="truncate" title={v.key}>{v.label}</span>
-                      {v.type === 'color' ? (
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <input
-                            type="color"
-                            value={rgbToHex(vars[v.key] ?? '#000000')}
-                            onChange={(e) => setVar(v.key, e.target.value)}
-                            className="w-7 h-6 rounded border border-chrome-border bg-transparent cursor-pointer p-0"
-                          />
+                  {items.map((v) =>
+                    v.type === 'font' ? (
+                      <div key={v.key} className="text-xs text-chrome-fg">
+                        <div className="mb-1 text-chrome-muted" title={v.key}>{v.label}</div>
+                        <FontSelect
+                          varKey={v.key}
+                          value={vars[v.key] ?? ''}
+                          onChange={(val) => setVar(v.key, val)}
+                        />
+                      </div>
+                    ) : (
+                      <div key={v.key} className="flex items-center justify-between gap-2 text-xs text-chrome-fg">
+                        <span className="truncate" title={v.key}>{v.label}</span>
+                        {v.type === 'color' ? (
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <input
+                              type="color"
+                              value={rgbToHex(vars[v.key] ?? '#000000')}
+                              onChange={(e) => setVar(v.key, e.target.value)}
+                              className="w-7 h-6 rounded border border-chrome-border bg-transparent cursor-pointer p-0"
+                            />
+                            <input
+                              value={vars[v.key] ?? ''}
+                              onChange={(e) => setVar(v.key, e.target.value)}
+                              className="w-20 bg-chrome-bg/60 text-chrome-fg px-1.5 py-0.5 rounded border border-chrome-border outline-none focus:border-chrome-accent font-mono text-[10px]"
+                            />
+                          </div>
+                        ) : (
                           <input
                             value={vars[v.key] ?? ''}
                             onChange={(e) => setVar(v.key, e.target.value)}
-                            className="w-20 bg-chrome-bg/60 text-chrome-fg px-1.5 py-0.5 rounded border border-chrome-border outline-none focus:border-chrome-accent font-mono text-[10px]"
+                            className="w-40 bg-chrome-bg/60 text-chrome-fg px-1.5 py-0.5 rounded border border-chrome-border outline-none focus:border-chrome-accent font-mono text-[10px] shrink-0"
                           />
-                        </div>
-                      ) : (
-                        <input
-                          value={vars[v.key] ?? ''}
-                          onChange={(e) => setVar(v.key, e.target.value)}
-                          className="w-40 bg-chrome-bg/60 text-chrome-fg px-1.5 py-0.5 rounded border border-chrome-border outline-none focus:border-chrome-accent font-mono text-[10px] shrink-0"
-                        />
-                      )}
-                    </div>
-                  ))}
+                        )}
+                      </div>
+                    ),
+                  )}
                 </div>
               </div>
             ))}
@@ -319,6 +332,75 @@ export function ThemeEditor({ editingId, onClose, onSaved }: Props) {
       </div>
     </div>,
     document.body,
+  );
+}
+
+const OTHER = '__other__';
+
+/**
+ * Font picker: a dropdown of curated stacks plus an "Other…" escape hatch that
+ * reveals a free-text field for an exact custom font-family value. If the
+ * current value doesn't match any preset, the field opens in "Other" mode so
+ * imported/hand-typed stacks remain editable.
+ */
+function FontSelect({
+  varKey,
+  value,
+  onChange,
+}: {
+  varKey: string;
+  value: string;
+  onChange: (val: string) => void;
+}) {
+  const presets = useMemo(() => {
+    const kinds = fontKindsFor(varKey);
+    return FONT_STACKS.filter((f) => kinds.includes(f.kind));
+  }, [varKey]);
+
+  const matched = presets.find((p) => p.value === value);
+  const [customMode, setCustomMode] = useState(!matched && value.trim() !== '');
+
+  // If the value changes to one that matches a preset (e.g. via Upload), leave
+  // custom mode so the dropdown reflects it.
+  useEffect(() => {
+    if (presets.some((p) => p.value === value)) setCustomMode(false);
+  }, [value, presets]);
+
+  const selectValue = customMode ? OTHER : matched ? matched.value : OTHER;
+
+  return (
+    <div className="flex flex-col gap-1">
+      <select
+        value={selectValue}
+        onChange={(e) => {
+          if (e.target.value === OTHER) {
+            setCustomMode(true);
+          } else {
+            setCustomMode(false);
+            onChange(e.target.value);
+          }
+        }}
+        title={value}
+        className="w-full bg-chrome-bg/60 text-chrome-fg px-1.5 py-1 rounded border border-chrome-border outline-none focus:border-chrome-accent text-[11px]"
+        style={{ fontFamily: matched ? matched.value : undefined }}
+      >
+        {presets.map((p) => (
+          <option key={p.value} value={p.value} style={{ fontFamily: p.value }}>
+            {p.label}
+          </option>
+        ))}
+        <option value={OTHER}>Other (custom)…</option>
+      </select>
+      {selectValue === OTHER && (
+        <input
+          autoFocus={customMode}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder='e.g. "My Font", system-ui, sans-serif'
+          className="w-full bg-chrome-bg/60 text-chrome-fg px-1.5 py-1 rounded border border-chrome-border outline-none focus:border-chrome-accent font-mono text-[10px]"
+        />
+      )}
+    </div>
   );
 }
 
