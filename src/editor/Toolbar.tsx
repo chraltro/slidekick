@@ -14,7 +14,6 @@ import {
   Search,
   Folder,
   FileText,
-  Sliders,
   FileDown,
 } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -45,8 +44,6 @@ export function Toolbar({ onOpenAudience, audienceConnected }: Props) {
   const setSlideJumperOpen = useUiStore((s) => s.setSlideJumperOpen);
   const setOverviewOpen = useUiStore((s) => s.setOverviewOpen);
   const setRecentDecksOpen = useUiStore((s) => s.setRecentDecksOpen);
-  const setThemeTweakerOpen = useUiStore((s) => s.setThemeTweakerOpen);
-  const themeTweakerOpen = useUiStore((s) => s.themeTweakerOpen);
 
   const [busy, setBusy] = useState(false);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
@@ -186,14 +183,6 @@ export function Toolbar({ onOpenAudience, audienceConnected }: Props) {
         </Button>
         <Button onClick={() => setOverviewOpen(true)} variant="ghost" size="sm" title="Overview (O)">
           <LayoutGrid size={14} />
-        </Button>
-        <Button
-          onClick={() => setThemeTweakerOpen(!themeTweakerOpen)}
-          variant="ghost"
-          size="sm"
-          title="Theme tweaker"
-        >
-          <Sliders size={14} />
         </Button>
         <ThemePicker current={parsed.config.theme} onPick={handleSetTheme} />
         <Button

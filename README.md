@@ -117,6 +117,17 @@ If `BroadcastChannel` isn't available (older browsers, restricted contexts), the
 
 Each theme is a pure CSS variable set (~150 lines). Add your own under `src/themes/` and it shows up in the picker.
 
+### Custom themes (no code)
+
+Open the theme picker and click **Create theme**. A full editor lets you set every theme variable (surfaces, accents, code colors, fonts, type scale, padding) with a live slide preview. Custom themes:
+
+- are saved in IndexedDB and appear in the picker for every deck in this browser,
+- can be edited or deleted later (hover a custom theme card and click the pencil),
+- **export** to a portable `.mdtheme.json` bundle, and
+- **upload** from a `.mdtheme.json` (a raw `.css` variable block is also accepted).
+
+Custom themes flow through everything the built-ins do: the live preview, the audience window, and the self-contained HTML export (their CSS is inlined automatically).
+
 You can also add deck-specific overrides via frontmatter:
 ```yaml
 customCss: |

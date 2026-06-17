@@ -19,7 +19,6 @@ interface UiState {
   slideJumperOpen: boolean;
   overviewOpen: boolean;
   recentDecksOpen: boolean;
-  themeTweakerOpen: boolean;
   drawingMode: boolean;
   /** Auto-advance enabled in present mode (driven by deck frontmatter). */
   autoAdvancePaused: boolean;
@@ -42,7 +41,6 @@ interface UiState {
   setSlideJumperOpen(b: boolean): void;
   setOverviewOpen(b: boolean): void;
   setRecentDecksOpen(b: boolean): void;
-  setThemeTweakerOpen(b: boolean): void;
   setDrawingMode(b: boolean): void;
   setAutoAdvancePaused(b: boolean): void;
 }
@@ -61,7 +59,6 @@ export const useUiStore = create<UiState>((set, get) => ({
   slideJumperOpen: false,
   overviewOpen: false,
   recentDecksOpen: false,
-  themeTweakerOpen: false,
   drawingMode: false,
   autoAdvancePaused: false,
 
@@ -91,7 +88,6 @@ export const useUiStore = create<UiState>((set, get) => ({
   setSlideJumperOpen: (b) => set({ slideJumperOpen: b }),
   setOverviewOpen: (b) => set({ overviewOpen: b }),
   setRecentDecksOpen: (b) => set({ recentDecksOpen: b }),
-  setThemeTweakerOpen: (b) => set({ themeTweakerOpen: b }),
   setDrawingMode: (b) => set({ drawingMode: b }),
   setAutoAdvancePaused: (b) => set({ autoAdvancePaused: b }),
 }));
