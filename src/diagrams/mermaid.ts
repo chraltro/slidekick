@@ -12,7 +12,10 @@ async function loadMermaid(): Promise<MermaidApi> {
         // Use a standard sans-serif so mermaid's text-width measurement
         // matches the rendered glyphs (mismatch causes label truncation).
         fontFamily: '"Inter", "Trebuchet MS", "Helvetica Neue", Arial, sans-serif',
-        flowchart: { useMaxWidth: false, htmlLabels: true, padding: 30, nodeSpacing: 50, rankSpacing: 50 },
+        // wrappingWidth: mermaid's default (200px) wraps mid-length labels onto a
+        // second line, which makes those nodes taller than their siblings and
+        // breaks the visual alignment of a rank. Widen it so labels stay on one line.
+        flowchart: { useMaxWidth: false, htmlLabels: true, padding: 30, nodeSpacing: 50, rankSpacing: 50, wrappingWidth: 500 },
         themeVariables: { fontSize: '20px' },
       });
       return m.default;
