@@ -305,6 +305,36 @@ Iframe injection.
 
 A style tag trying to hide the whole slide must not nuke rendering.
 
+# XSS Autofocus Onfocus
+
+<input autofocus onfocus="window.__xss_focus=1" value="x">
+
+Autofocus + onfocus must not fire.
+
+# XSS Details Ontoggle
+
+<details open ontoggle="window.__xss_toggle=1"><summary>s</summary>body</details>
+
+# XSS SVG Use Href
+
+<svg width="20" height="20"><use href="javascript:window.__xss_use=1"/></svg>
+
+SVG use with a javascript href.
+
+# XSS Body/Video/Marquee
+
+<video><source onerror="window.__xss_video=1"></video>
+<marquee onstart="window.__xss_marquee=1">x</marquee>
+<a href="JAVASCRIPT:window.__xss_upper=1">upper-case scheme</a>
+
+# XSS Entity-Encoded Scheme
+
+<a href="javascript&#58;window.__xss_entity=1">entity colon</a> and <a href="  javascript:window.__xss_space=1">leading space</a>.
+
+# XSS Nested Payload
+
+<div><p>text <img src=x onerror="window.__xss_nested=1"> more</p></div>
+
 # Currency Not Math
 
 The plan costs $5 today and $10 tomorrow, a $5 to $10 range, so $$ is money not math here.

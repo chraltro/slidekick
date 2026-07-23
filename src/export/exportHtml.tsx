@@ -93,7 +93,11 @@ export async function exportDeckHtml(deck: ParsedDeck, title: string): Promise<s
     }
   }
 
-  const userCss = deck.config.customCss ?? '';
+  // Live, customCss is applied via style.textContent (no HTML parsing). In the
+  // export it is concatenated into a <style> in the template, so a crafted
+  // `</style><script>…` would break out and run when the file is opened.
+  // Neutralize the only sequences that can close the element.
+  const userCss = (deck.config.customCss ?? '').replace(/<\/(style|script)/gi, '<\\/$1');
 
   // IMPORTANT: use a function replacement for every token. A plain-string
   // replacement value would have its `$` sequences ($&, $1, $$, …) interpreted

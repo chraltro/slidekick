@@ -75,6 +75,12 @@ add('XSS SVG Onload', `<svg onload="window.__xss_svg=1"><rect width="10" height=
 add('XSS Javascript Link', `[click me](javascript:window.__xss_link=1) and <a href="javascript:window.__xss_a=1">raw anchor</a>.`);
 add('XSS Iframe', `<iframe src="javascript:window.__xss_iframe=1" width="200" height="100"></iframe>\n\nIframe injection.`);
 add('HTML Style Injection', `<style>.slide-canvas{display:none!important}</style>\n\nA style tag trying to hide the whole slide must not nuke rendering.`);
+add('XSS Autofocus Onfocus', `<input autofocus onfocus="window.__xss_focus=1" value="x">\n\nAutofocus + onfocus must not fire.`);
+add('XSS Details Ontoggle', `<details open ontoggle="window.__xss_toggle=1"><summary>s</summary>body</details>`);
+add('XSS SVG Use Href', `<svg width="20" height="20"><use href="javascript:window.__xss_use=1"/></svg>\n\nSVG use with a javascript href.`);
+add('XSS Body/Video/Marquee', `<video><source onerror="window.__xss_video=1"></video>\n<marquee onstart="window.__xss_marquee=1">x</marquee>\n<a href="JAVASCRIPT:window.__xss_upper=1">upper-case scheme</a>`);
+add('XSS Entity-Encoded Scheme', `<a href="javascript&#58;window.__xss_entity=1">entity colon</a> and <a href="  javascript:window.__xss_space=1">leading space</a>.`);
+add('XSS Nested Payload', `<div><p>text <img src=x onerror="window.__xss_nested=1"> more</p></div>`);
 
 // ---- Math edge -------------------------------------------------------------
 add('Currency Not Math', `The plan costs $5 today and $10 tomorrow, a $5 to $10 range, so $$ is money not math here.`);
