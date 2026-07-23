@@ -10,6 +10,7 @@ import { renderIcons } from '@/icons/renderIcons';
 import { renderCharts } from '@/charts/renderCharts';
 import { renderMath } from '@/math/katex';
 import { renderMermaid } from '@/diagrams/mermaid';
+import { fitScale, fitCode } from '@/slides/layouts/fit';
 import { getAssetDataUri } from '@/storage/assetStore';
 import { shikiThemeFor } from '@/code/themeMap';
 import { ensureCustomThemesLoaded, getLoadedCustomThemes } from '@/themes/useCustomThemes';
@@ -92,7 +93,11 @@ export async function exportDeckHtml(deck: ParsedDeck, title: string): Promise<s
     }
   }
 
-  const userCss = deck.config.customCss ?? '';
+  // Live, customCss is applied via style.textContent (no HTML parsing). In the
+  // export it is concatenated into a <style> in the template, so a crafted
+  // `</style><script>…` would break out and run when the file is opened.
+  // Neutralize the only sequences that can close the element.
+  const userCss = (deck.config.customCss ?? '').replace(/<\/(style|script)/gi, '<\\/$1');
 
   // IMPORTANT: use a function replacement for every token. A plain-string
   // replacement value would have its `$` sequences ($&, $1, $$, …) interpreted
@@ -161,6 +166,16 @@ async function renderSlideToString(
     // Inline assets (images) as data: URIs and drop interactive-only chrome.
     await inlineSlideAssets(slideEl);
     stripInteractiveChrome(slideEl);
+
+    // Fit oversized content to the fixed canvas, matching the live preview.
+    // Runs last, after enhancement + asset inlining, so measurements reflect
+    // final content sizes (the host container is a real 1920×1080 box). In the
+    // live app this is driven by React effects; here we invoke it imperatively.
+    slideEl.querySelectorAll<HTMLElement>('.fit-outer').forEach((outer) => {
+      const inner = outer.querySelector<HTMLElement>(':scope > .fit-inner');
+      if (inner) fitScale(outer, inner);
+    });
+    fitCode(slideEl);
 
     return slideEl.outerHTML;
   } finally {
