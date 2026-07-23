@@ -9,12 +9,21 @@ import path from 'node:path';
  * no page/console errors, and all diagrams/charts/math resolved.
  */
 
-const ART = path.join(process.cwd(), 'tests', 'artifacts', 'stress');
+// Optional overrides so the same 160-slide deck can be swept across themes and
+// aspect ratios (different type scales / padding / widths stress the fit logic
+// differently). e.g. THEME=academic-paper ASPECT=4:3 playwright test ...
+const THEME = process.env.THEME;
+const ASPECT = process.env.ASPECT;
+const VARIANT = [THEME, ASPECT].filter(Boolean).join('_') || 'default';
+
+const ART = path.join(process.cwd(), 'tests', 'artifacts', 'stress', VARIANT);
 fs.mkdirSync(ART, { recursive: true });
-const DECK = fs.readFileSync(
+let DECK = fs.readFileSync(
   path.join(process.cwd(), 'tests', 'fixtures', 'stress-deck.md'),
   'utf8',
 );
+if (THEME) DECK = DECK.replace(/^theme:.*$/m, `theme: ${THEME}`);
+if (ASPECT) DECK = DECK.replace(/^aspect:.*$/m, `aspect: ${ASPECT}`);
 
 async function loadDeck(page: Page, src: string) {
   await page.waitForFunction(() => !!(window as any).__cmView, null, { timeout: 15000 });

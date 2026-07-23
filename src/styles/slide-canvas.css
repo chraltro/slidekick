@@ -770,6 +770,23 @@
   align-items: center;
 }
 
+/* Heading layouts (title / section-divider / end) also get the fit safety net
+   so a very long title can't overflow. The fit box must fill the slide, and
+   section-divider / end keep their centered text. */
+.slide-canvas .layout-title > .fit-outer,
+.slide-canvas .layout-section-divider > .fit-outer,
+.slide-canvas .layout-end > .fit-outer {
+  flex: 1 1 auto;
+  align-self: stretch;
+}
+.slide-canvas .layout-section-divider .fit-inner,
+.slide-canvas .layout-end .fit-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
 /* ---------- Slide transitions ---------- */
 @keyframes slide-fade-in { from { opacity: 0 } to { opacity: 1 } }
 @keyframes slide-slide-in { from { opacity: 0; transform: translateX(40px) } to { opacity: 1; transform: translateX(0) } }
