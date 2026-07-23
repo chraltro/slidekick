@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { SlideAST, DeckConfig } from './types';
 import { RenderSlide } from './renderSlide';
+import { ErrorBoundary } from '@/ui/ErrorBoundary';
 
 /**
  * Wraps a slide in the fit-scaling stage. Uses ResizeObserver to compute
@@ -49,12 +50,32 @@ export function SlideStage({
     <div ref={stageRef} className={`slide-stage ${className ?? ''}`}>
       <div ref={scalerRef} className="slide-scaler">
         {slide && (
-          <RenderSlide
-            slide={slide}
-            config={config}
-            totalSlides={totalSlides}
-            showPageNumber={showPageNumber}
-          />
+          <ErrorBoundary
+            resetKey={slide.hash}
+            fallback={() => (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100%',
+                  color: '#f87171',
+                  fontSize: '1.25rem',
+                  padding: '2rem',
+                  textAlign: 'center',
+                }}
+              >
+                This slide failed to render. Check its markdown.
+              </div>
+            )}
+          >
+            <RenderSlide
+              slide={slide}
+              config={config}
+              totalSlides={totalSlides}
+              showPageNumber={showPageNumber}
+            />
+          </ErrorBoundary>
         )}
       </div>
     </div>

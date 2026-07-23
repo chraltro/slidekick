@@ -83,7 +83,7 @@ md.renderer.rules.fence = (tokens, idx) => {
 
 // Math rendering: $...$ inline, $$...$$ block. We tokenize as inline 'math_inline'
 // and block 'math_block' placeholders that the runtime fills with KaTeX.
-function mathRule(state: StateInline) {
+function mathRule(state: StateInline, silent: boolean) {
   const start = state.pos;
   const src = state.src;
   if (src[start] !== '$') return false;
@@ -103,12 +103,16 @@ function mathRule(state: StateInline) {
   if (end - start < 2) return false;
   const content = src.slice(start + 1, end);
   if (!content.trim()) return false;
-  const token = state.push('math_inline', 'span', 0);
-  token.content = content;
+  // markdown-it runs inline rules with silent=true during validation scans
+  // (e.g. link labels); emitting tokens there corrupts the token stream.
+  if (!silent) {
+    const token = state.push('math_inline', 'span', 0);
+    token.content = content;
+  }
   state.pos = end + 1;
   return true;
 }
-md.inline.ruler.after('escape', 'math_inline', mathRule as any);
+md.inline.ruler.after('escape', 'math_inline', mathRule);
 md.renderer.rules.math_inline = (tokens, idx) =>
   `<span class="math-inline" data-tex="${encodeURIComponent(tokens[idx].content)}">${escapeHtml(tokens[idx].content)}</span>`;
 
@@ -281,10 +285,8 @@ export function splitSlides(markdown: string): RawSlideChunk[] {
   return chunks;
 }
 
-const META_COMMENT_RE = /<!--\s*([\s\S]*?)\s*-->/;
-
 /** Returns true if `offset` falls inside a fenced code block in `src`. */
-function isInsideFence(src: string, offset: number): boolean {
+export function isInsideFence(src: string, offset: number): boolean {
   let pos = 0;
   let inFence = false;
   let fenceMarker = '';
@@ -314,7 +316,10 @@ function isInsideFence(src: string, offset: number): boolean {
 export function parseSlideMeta(source: string): { meta: SlideMeta; cleaned: string; notes?: string } {
   const meta: SlideMeta = {};
   let notes: string | undefined;
-  let cleaned = source;
+  // Comments to strip, as [start, end) offsets. Removing by offset (rather than
+  // string replace) guarantees we delete the directive we actually matched —
+  // a textually identical comment inside a code fence must stay untouched.
+  const removals: Array<[number, number]> = [];
 
   // Iterate; first comment with structured keys wins, but we collect notes from any.
   let match: RegExpExecArray | null;
@@ -328,7 +333,7 @@ export function parseSlideMeta(source: string): { meta: SlideMeta; cleaned: stri
     if (/^notes\s*:/i.test(inner)) {
       const noteText = inner.replace(/^notes\s*:\s*/i, '').trim();
       notes = (notes ? notes + '\n' : '') + noteText;
-      cleaned = cleaned.replace(match[0], '');
+      removals.push([match.index, match.index + match[0].length]);
       continue;
     }
     // Structured key:value;key:value
@@ -371,14 +376,23 @@ export function parseSlideMeta(source: string): { meta: SlideMeta; cleaned: stri
         }
       }
       if (consumed) {
-        cleaned = cleaned.replace(match[0], '');
+        removals.push([match.index, match.index + match[0].length]);
       }
     }
   }
 
+  let cleaned = source;
+  if (removals.length > 0) {
+    let out = '';
+    let pos = 0;
+    for (const [start, end] of removals) {
+      out += source.slice(pos, start);
+      pos = end;
+    }
+    cleaned = out + source.slice(pos);
+  }
+
   if (notes) meta.notes = notes;
-  // Use the matcher above just to silence unused-var lint for META_COMMENT_RE
-  void META_COMMENT_RE;
   return { meta, cleaned, notes };
 }
 
@@ -407,6 +421,31 @@ function applyFragments(html: string): string {
   });
 }
 
+/**
+ * DOM version of applyFragments: tags any `<li>` whose first text starts with
+ * "+ " — including loose lists (`<li><p>+ …</p></li>`) and attributed items,
+ * which the regex form misses.
+ */
+function tagFragments(doc: Document): void {
+  let step = 0;
+  doc.querySelectorAll('li').forEach((li) => {
+    const walker = doc.createTreeWalker(li, NodeFilter.SHOW_TEXT);
+    let node: Node | null;
+    while ((node = walker.nextNode())) {
+      const text = node.nodeValue ?? '';
+      if (!text.trim()) continue;
+      // First meaningful text belongs to a nested item — let that item decide.
+      if (node.parentElement?.closest('li') !== li) break;
+      if (/^\s*\+\s+/.test(text)) {
+        node.nodeValue = text.replace(/^(\s*)\+\s+/, '$1');
+        step += 1;
+        li.setAttribute('data-fragment', String(step));
+      }
+      break;
+    }
+  });
+}
+
 // Raw HTML is allowed in slides (html: true) so authors can drop in the odd
 // <div>/<sup>/<br>. But rendered markdown is fed to dangerouslySetInnerHTML, so
 // untrusted decks (e.g. pasted from an LLM) could smuggle in active content.
@@ -415,9 +454,7 @@ function applyFragments(html: string): string {
 const DANGEROUS_TAGS = 'script,iframe,object,embed,style,link,meta,base,form,frame,frameset,noscript';
 const DANGEROUS_URL = /^\s*(?:javascript|vbscript|data:text\/html)/i;
 
-function sanitizeHtml(html: string): string {
-  if (typeof DOMParser === 'undefined') return html; // non-DOM environments
-  const doc = new DOMParser().parseFromString(`<body>${html}</body>`, 'text/html');
+function sanitizeDoc(doc: Document): void {
   doc.querySelectorAll(DANGEROUS_TAGS).forEach((el) => el.remove());
   doc.querySelectorAll('*').forEach((el) => {
     for (const attr of Array.from(el.attributes)) {
@@ -432,11 +469,16 @@ function sanitizeHtml(html: string): string {
       }
     }
   });
-  return doc.body.innerHTML;
 }
 
 function renderSlideHtml(cleaned: string): string {
-  return applyFragments(sanitizeHtml(md.render(cleaned)));
+  const rendered = md.render(cleaned);
+  if (typeof DOMParser === 'undefined') return applyFragments(rendered); // non-DOM environments
+  // One DOMParser round-trip serves both the sanitizer and fragment tagging.
+  const doc = new DOMParser().parseFromString(`<body>${rendered}</body>`, 'text/html');
+  sanitizeDoc(doc);
+  tagFragments(doc);
+  return doc.body.innerHTML;
 }
 
 /**
@@ -469,6 +511,21 @@ function splitFrontmatter(markdown: string): { data: Record<string, unknown>; co
   return { data, content, bodyOffset };
 }
 
+// Per-slide render cache keyed by content hash. Typing re-parses the whole
+// deck on every keystroke; meta extraction, markdown-it render, and the
+// DOMParser sanitize pass are pure functions of the chunk source, so unchanged
+// slides reuse the previous result. Rebuilt from live entries on each parse,
+// so it never outgrows the deck. Layout is NOT cached: autoLayout depends on
+// slide position (index/total), which shifts when slides are added or removed.
+interface CachedSlideRender {
+  meta: SlideMeta;
+  cleaned: string;
+  html: string;
+  notes?: string;
+  title?: string;
+}
+let slideRenderCache = new Map<string, CachedSlideRender>();
+
 export function parseDeck(markdown: string): ParsedDeck {
   const fm = splitFrontmatter(markdown);
   const config: DeckConfig = {
@@ -484,26 +541,38 @@ export function parseDeck(markdown: string): ParsedDeck {
   const bodyToSource = fm.bodyOffset + norm.leadOffset;
   const chunks = splitSlides(norm.text);
 
+  const nextCache = new Map<string, CachedSlideRender>();
   const slides: SlideAST[] = chunks.map((chunk, i) => {
-    const { meta, cleaned, notes } = parseSlideMeta(chunk.source);
-    const layout: Layout = meta.layout ?? autoLayout(cleaned, i, chunks.length);
-    const html = renderSlideHtml(cleaned);
-    const title = extractTitle(cleaned);
+    const hash = hash32(chunk.source);
+    let entry = slideRenderCache.get(hash) ?? nextCache.get(hash);
+    if (!entry) {
+      const { meta, cleaned, notes } = parseSlideMeta(chunk.source);
+      entry = {
+        meta,
+        cleaned,
+        html: renderSlideHtml(cleaned),
+        notes,
+        title: extractTitle(cleaned),
+      };
+    }
+    nextCache.set(hash, entry);
+    const layout: Layout = entry.meta.layout ?? autoLayout(entry.cleaned, i, chunks.length);
     return {
       index: i,
-      hash: hash32(chunk.source),
+      hash,
       range: {
         start: chunk.range.start + bodyToSource,
         end: chunk.range.end + bodyToSource,
       },
       source: chunk.source,
       layout,
-      meta,
-      html,
-      notes,
-      title,
+      meta: entry.meta,
+      html: entry.html,
+      notes: entry.notes,
+      title: entry.title,
     };
   });
+  slideRenderCache = nextCache;
 
   return { config, slides, source: markdown };
 }

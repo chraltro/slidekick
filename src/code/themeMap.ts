@@ -59,6 +59,11 @@ export const SHIKI_LANGS = [
   'markdown',
 ] as const;
 
-export function shikiThemeFor(appTheme: string): string {
-  return THEME_TO_SHIKI[appTheme] ?? 'github-dark';
+export function shikiThemeFor(theme: string): string {
+  if (THEME_TO_SHIKI[theme]) return THEME_TO_SHIKI[theme];
+  // Callers may already hold a resolved Shiki theme name (frontmatter
+  // `codeTheme:`, custom themes) — pass those through instead of falling
+  // back to github-dark.
+  if ((SHIKI_THEMES as readonly string[]).includes(theme)) return theme;
+  return 'github-dark';
 }

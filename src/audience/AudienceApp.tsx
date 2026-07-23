@@ -67,7 +67,11 @@ export default function AudienceApp() {
     return () => window.removeEventListener('keydown', onKey);
   }, [navigate, setBlank, state.blankMode, state.currentIndex, state.slides.length]);
 
-  const currentSlide = state.slides[state.currentIndex] ?? null;
+  // Clamp: NAV can reference an index this window doesn't have yet (or no
+  // longer has, if the deck shrank) — show the nearest valid slide instead of
+  // dropping back to the placeholder mid-presentation.
+  const clampedIndex = Math.min(state.currentIndex, state.slides.length - 1);
+  const currentSlide = state.slides[clampedIndex] ?? null;
 
   if (state.blankMode === 'black') {
     return <div className="fixed inset-0 bg-black" />;

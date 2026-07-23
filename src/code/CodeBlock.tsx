@@ -52,6 +52,21 @@ function parseFenceInfo(info: string): FenceMeta {
   return meta;
 }
 
+// Shiki output cache. The editor re-enhances the edited slide on every
+// keystroke (and the same slide renders in the preview, thumbnail rail, and
+// overview at once) — without this, each of those re-runs full TextMate
+// highlighting per code block. Keyed by everything that affects the output.
+const highlightCache = new Map<string, string>();
+const HIGHLIGHT_CACHE_MAX = 300;
+
+function cacheHighlight(key: string, html: string): void {
+  if (highlightCache.size >= HIGHLIGHT_CACHE_MAX) {
+    const oldest = highlightCache.keys().next().value;
+    if (oldest !== undefined) highlightCache.delete(oldest);
+  }
+  highlightCache.set(key, html);
+}
+
 /**
  * Replace `.codeblock-placeholder` divs in `root` with rendered Shiki HTML.
  * Idempotent: marks processed elements with data-processed.
@@ -84,34 +99,39 @@ export async function enhanceCodeBlocks(root: HTMLElement, codeTheme: string): P
 
     const lang = isLangSupported(fence.lang) ? fence.lang : isLangSupported(langRaw) ? langRaw : 'text';
 
-    let highlighted = '';
-    try {
-      highlighted = shiki.codeToHtml(content, {
-        lang,
-        theme,
-        transformers: [
-          {
-            line(node, line) {
-              if (fence.highlights.size > 0) {
-                if (fence.highlights.has(line)) {
-                  this.addClassToHast(node, 'line highlighted');
+    // NUL-joined so adjacent fields can't collide.
+    const cacheKey = [theme, lang, info, content].join('\u0000');
+    let highlighted = highlightCache.get(cacheKey) ?? '';
+    if (!highlighted) {
+      try {
+        highlighted = shiki.codeToHtml(content, {
+          lang,
+          theme,
+          transformers: [
+            {
+              line(node, line) {
+                if (fence.highlights.size > 0) {
+                  if (fence.highlights.has(line)) {
+                    this.addClassToHast(node, 'line highlighted');
+                  } else {
+                    this.addClassToHast(node, 'line dimmed');
+                  }
                 } else {
-                  this.addClassToHast(node, 'line dimmed');
+                  this.addClassToHast(node, 'line');
                 }
-              } else {
-                this.addClassToHast(node, 'line');
-              }
+              },
             },
-          },
-        ],
-      });
-    } catch {
-      // Fallback: plain pre/code with HTML-escaped content
-      const escaped = content
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-      highlighted = `<pre><code>${escaped}</code></pre>`;
+          ],
+        });
+        cacheHighlight(cacheKey, highlighted);
+      } catch {
+        // Fallback: plain pre/code with HTML-escaped content
+        const escaped = content
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+        highlighted = `<pre><code>${escaped}</code></pre>`;
+      }
     }
 
     const wrapper = document.createElement('div');

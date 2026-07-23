@@ -1,4 +1,6 @@
-import { icons } from 'lucide';
+// Lazy-loaded: the full lucide icon dataset is large, and most decks use no
+// icons at all. Mirrors the shiki/mermaid/katex loading pattern.
+let lucidePromise: Promise<typeof import('lucide')> | null = null;
 
 /**
  * Replace `<span class="lucide-icon" data-icon="name">` placeholders with the
@@ -40,9 +42,10 @@ const BRAND_ICONS: Record<string, string> = {
   google: `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" class="lucide-svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18a11 11 0 0 0 0 9.86l3.66-2.84z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>`,
 };
 
-export function renderIcons(root: HTMLElement): void {
+export async function renderIcons(root: HTMLElement): Promise<void> {
   const placeholders = Array.from(root.querySelectorAll<HTMLElement>('.lucide-icon:not([data-processed])'));
   if (placeholders.length === 0) return;
+  const { icons } = await (lucidePromise ??= import('lucide'));
   for (const el of placeholders) {
     const raw = (el.dataset.icon ?? '').trim();
     if (!raw) {
@@ -68,7 +71,13 @@ export function renderIcons(root: HTMLElement): void {
 
     // Quiet fallback: a small accent dot, with a tooltip showing the name we
     // failed to find. Never the loud red ❓ that broke the design before.
-    el.innerHTML = `<span class="lucide-missing" title="Unknown icon: ${raw}" aria-label="Unknown icon ${raw}"></span>`;
+    // Built via DOM APIs — `raw` comes from a data attribute authors control,
+    // so it must not be interpolated into markup.
+    const missing = document.createElement('span');
+    missing.className = 'lucide-missing';
+    missing.title = `Unknown icon: ${raw}`;
+    missing.setAttribute('aria-label', `Unknown icon ${raw}`);
+    el.replaceChildren(missing);
     el.dataset.processed = '1';
   }
 }

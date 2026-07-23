@@ -12,6 +12,9 @@ import SectionDivider from './layouts/SectionDivider';
 import End from './layouts/End';
 import clsx from 'clsx';
 import { useUiStore } from '@/state/useUiStore';
+import { CodeThemeContext } from './layouts/renderContext';
+import { shikiThemeFor } from '@/code/themeMap';
+import { getLoadedCustomThemes } from '@/themes/useCustomThemes';
 
 const COMPONENTS = {
   title: Title,
@@ -49,6 +52,13 @@ export function RenderSlide({ slide, config, totalSlides, showPageNumber }: Rend
   });
   const transition = navigated ? (config.transition ?? 'fade') : 'none';
 
+  // Same resolution order as the HTML export (exportHtml.tsx), so the live
+  // preview and the exported file highlight code identically.
+  const codeTheme =
+    config.codeTheme ??
+    getLoadedCustomThemes().find((t) => t.id === config.theme)?.shikiTheme ??
+    shikiThemeFor(config.theme);
+
   const inlineStyle: React.CSSProperties = {};
   if (slide.meta.bg) inlineStyle.background = slide.meta.bg;
   if (slide.meta.color) inlineStyle.color = slide.meta.color;
@@ -59,28 +69,30 @@ export function RenderSlide({ slide, config, totalSlides, showPageNumber }: Rend
   }
 
   return (
-    <div
-      className={clsx(
-        'slide-canvas slide',
-        aspectClass,
-        `theme-${config.theme}`,
-        `transition-${transition}`,
-        slide.meta.class,
-      )}
-      style={inlineStyle}
-      data-slide-index={slide.index}
-      data-slide-hash={slide.hash}
-      data-slide-layout={slide.layout}
-      data-fragment-step={fragmentStep}
-      key={slide.hash}
-    >
-      <Component slide={slide} />
-      {(showPageNumber ?? config.pageNumber) && (
-        <div className="page-number">
-          {slide.index + 1} / {totalSlides}
-        </div>
-      )}
-      {config.footer && <div className="footer">{config.footer}</div>}
-    </div>
+    <CodeThemeContext.Provider value={codeTheme}>
+      <div
+        className={clsx(
+          'slide-canvas slide',
+          aspectClass,
+          `theme-${config.theme}`,
+          `transition-${transition}`,
+          slide.meta.class,
+        )}
+        style={inlineStyle}
+        data-slide-index={slide.index}
+        data-slide-hash={slide.hash}
+        data-slide-layout={slide.layout}
+        data-fragment-step={fragmentStep}
+        key={slide.hash}
+      >
+        <Component slide={slide} />
+        {(showPageNumber ?? config.pageNumber) && (
+          <div className="page-number">
+            {slide.index + 1} / {totalSlides}
+          </div>
+        )}
+        {config.footer && <div className="footer">{config.footer}</div>}
+      </div>
+    </CodeThemeContext.Provider>
   );
 }

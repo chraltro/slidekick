@@ -35,19 +35,27 @@ export function DrawOverlay() {
   useEffect(() => {
     if (!drawing) return;
     const onKey = (e: KeyboardEvent) => {
+      // stopPropagation: this capture-phase listener runs before the global
+      // shortcut handler, which would otherwise ALSO act on the same key
+      // (D would re-enter draw mode, Esc would exit the whole presentation).
       if (e.key === 'Escape' || e.key.toLowerCase() === 'd') {
         e.preventDefault();
+        e.stopPropagation();
         setDrawing(false);
         clear();
       } else if (e.key.toLowerCase() === 'c') {
         e.preventDefault();
+        e.stopPropagation();
         clear();
       } else if (/^[1-6]$/.test(e.key)) {
         e.preventDefault();
+        e.stopPropagation();
         setColor(COLORS[parseInt(e.key, 10) - 1]);
       } else if (e.key === '+' || e.key === '=') {
+        e.stopPropagation();
         setWidth((w) => Math.min(12, w + 1));
       } else if (e.key === '-') {
+        e.stopPropagation();
         setWidth((w) => Math.max(1, w - 1));
       }
     };

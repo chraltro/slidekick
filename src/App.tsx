@@ -17,5 +17,11 @@ export default function App() {
     return () => window.removeEventListener('popstate', onPop);
   }, []);
 
+  // The audience window is what gets screen-shared — index.html chrome (the
+  // demant.app link) hides itself off this class.
+  useEffect(() => {
+    document.body.classList.toggle('audience', role === 'audience');
+  }, [role]);
+
   return role === 'audience' ? <AudienceApp /> : <EditorApp />;
 }

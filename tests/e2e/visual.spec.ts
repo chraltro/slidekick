@@ -215,7 +215,9 @@ test.describe('UX / visual inspection', () => {
     await page.waitForTimeout(800);
 
     const downloadPromise = page.waitForEvent('download');
+    // The Export button opens a menu; pick the self-contained HTML option.
     await page.getByRole('button', { name: /^export$/i }).click();
+    await page.getByRole('button', { name: /HTML \(self-contained\)/i }).click();
     const download = await downloadPromise;
     const exportPath = path.join(ART, 'export.html');
     await download.saveAs(exportPath);

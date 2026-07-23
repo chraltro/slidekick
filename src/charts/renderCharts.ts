@@ -28,6 +28,17 @@ function escapeHtml(s: string): string {
   );
 }
 
+/**
+ * User-supplied colors are interpolated into SVG attribute values, so they
+ * must be escaped — `colors: ['red"><img onerror=…>']` would otherwise break
+ * out of the attribute and execute.
+ */
+function paletteFor(cfg: ChartConfig): string[] {
+  const colors = cfg.colors;
+  if (!colors || colors.length === 0) return DEFAULT_PALETTE;
+  return colors.map((c) => escapeHtml(String(c)));
+}
+
 function parseConfig(src: string): ChartConfig {
   try {
     const parsed = yaml.load(src);
@@ -64,7 +75,7 @@ function renderBar(cfg: ChartConfig): string {
   }
   if (labels.length === 0) return `<div class="chart-error">Empty chart data</div>`;
 
-  const palette = cfg.colors ?? DEFAULT_PALETTE;
+  const palette = paletteFor(cfg);
   const yMax = cfg.yMax ?? (Math.max(...values, 0) * 1.1 || 1);
   const barW = (innerW / labels.length) * 0.7;
   const gap = (innerW / labels.length) * 0.3;
@@ -83,7 +94,9 @@ function renderBar(cfg: ChartConfig): string {
   const bars = labels
     .map((label, i) => {
       const v = values[i] ?? 0;
-      const h = (v / yMax) * innerH;
+      // Clamp: a negative value would produce a negative rect height, which
+      // SVG rejects (the bar silently disappears).
+      const h = Math.max(0, (v / yMax) * innerH);
       const x = PAD_LEFT + (innerW / labels.length) * i + gap / 2;
       const y = PAD_TOP + innerH - h;
       const color = palette[i % palette.length];
@@ -131,7 +144,7 @@ function renderLine(cfg: ChartConfig): string {
   }
   if (labels.length === 0) return `<div class="chart-error">Empty chart data</div>`;
 
-  const palette = cfg.colors ?? DEFAULT_PALETTE;
+  const palette = paletteFor(cfg);
   const allValues = Object.values(series).flat();
   const yMax = cfg.yMax ?? (Math.max(...allValues, 0) * 1.1 || 1);
   const yMin = Math.min(0, ...allValues);
@@ -225,7 +238,7 @@ function renderPie(cfg: ChartConfig, donut = false): string {
   if (entries.length === 0) return `<div class="chart-error">Empty chart data</div>`;
 
   const total = entries.reduce((s, [, v]) => s + Math.max(0, v), 0) || 1;
-  const palette = cfg.colors ?? DEFAULT_PALETTE;
+  const palette = paletteFor(cfg);
   const cx = 200;
   const cy = H / 2 + 10;
   const r = 140;

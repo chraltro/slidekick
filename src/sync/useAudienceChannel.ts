@@ -46,6 +46,13 @@ export function useAudienceChannel() {
         }));
       } else if (msg.type === 'STATE_DIFF') {
         setState((prev) => {
+          // A diff only makes sense against a baseline from the same deck.
+          // Otherwise (missed STATE, deck switched) ask for a full resend
+          // instead of splicing foreign slides into whatever we have.
+          if (prev.deckId !== msg.deckId || prev.slides.length === 0) {
+            ch.post({ type: 'HELLO', from: 'audience' });
+            return prev;
+          }
           const next = prev.slides.slice();
           for (let i = 0; i < msg.changedIndices.length; i++) {
             next[msg.changedIndices[i]] = msg.slides[i];
@@ -56,6 +63,8 @@ export function useAudienceChannel() {
             ...prev,
             slides: next,
             config: msg.config,
+            // Keep the visible slide in range when the deck shrinks.
+            currentIndex: Math.min(prev.currentIndex, Math.max(0, msg.total - 1)),
             rev: msg.rev,
           };
         });

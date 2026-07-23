@@ -2,18 +2,20 @@ import { useEffect } from 'react';
 import { useDeckStore } from '@/state/useDeckStore';
 import { useUiStore } from '@/state/useUiStore';
 import { exportDeckHtml, downloadFile } from '@/export/exportHtml';
-export {};
+import { flushSaveNow } from './autosave';
 
 export function useGlobalShortcuts(openAudience: () => void) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
       const tag = target?.tagName;
+      // Also stand down when a control is focused: stealing Space/arrows from
+      // a focused button or select breaks keyboard operation of the toolbar.
       const inEditable =
         tag === 'INPUT' ||
         tag === 'TEXTAREA' ||
         target?.isContentEditable ||
-        target?.closest?.('.cm-editor');
+        target?.closest?.('.cm-editor, button, [role="button"], select, [role="dialog"]');
       const meta = e.metaKey || e.ctrlKey;
       const ui = useUiStore.getState();
       const deck = useDeckStore.getState();
@@ -42,7 +44,9 @@ export function useGlobalShortcuts(openAudience: () => void) {
       }
       if (meta && e.key.toLowerCase() === 's') {
         e.preventDefault();
-        deck && useDeckStore.setState({ lastSavedAt: Date.now(), dirty: false });
+        // Actually write to IndexedDB now — flushSaveNow clears the dirty
+        // flag only once the write has landed.
+        void flushSaveNow();
         return;
       }
 
@@ -104,17 +108,26 @@ export function useGlobalShortcuts(openAudience: () => void) {
         case 'b':
         case 'B':
         case '.':
-          ui.setBlank(ui.blankMode === 'black' ? 'off' : 'black');
+          // Present-mode only: blanking while editing arms an invisible black
+          // screen that only shows up the next time Present is pressed.
+          if (ui.isPresenting) ui.setBlank(ui.blankMode === 'black' ? 'off' : 'black');
           break;
         case 'w':
         case 'W':
-          ui.setBlank(ui.blankMode === 'white' ? 'off' : 'white');
+          if (ui.isPresenting) ui.setBlank(ui.blankMode === 'white' ? 'off' : 'white');
           break;
         case 'f':
         case 'F':
           if (document.fullscreenElement) document.exitFullscreen();
           else document.documentElement.requestFullscreen();
           break;
+        default:
+          // Number keys jump straight to slide N while presenting, matching
+          // the audience window and the exported deck.
+          if (ui.isPresenting && /^[1-9]$/.test(e.key)) {
+            const idx = parseInt(e.key, 10) - 1;
+            if (idx < total) ui.setCurrentSlide(idx);
+          }
       }
     };
     window.addEventListener('keydown', onKey);

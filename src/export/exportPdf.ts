@@ -12,7 +12,7 @@ export async function exportDeckPdf(deck: ParsedDeck, title: string): Promise<vo
   const printableHtml = html.replace(
     '</head>',
     `<style media="print">
-      @page { size: ${deck.config.aspect === '4:3' ? '14.4in 10.8in' : deck.config.aspect === '1:1' ? '10.8in 10.8in' : '19.2in 10.8in'}; margin: 0; }
+      @page { size: ${deck.config.aspect === '4:3' ? '1440px 1080px' : deck.config.aspect === '1:1' ? '1080px 1080px' : '1920px 1080px'}; margin: 0; }
       html, body { background: #000 !important; overflow: visible !important; }
       #stage { display: block !important; position: static !important; inset: auto !important; overflow: visible !important; }
       #scaler { transform: none !important; position: static !important; display: block !important; top: auto !important; left: auto !important; }

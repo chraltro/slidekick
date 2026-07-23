@@ -59,7 +59,10 @@ export function FitScale({
       timers.forEach((t) => window.clearTimeout(t));
       ro.disconnect();
     };
-  });
+    // Mount-only: content changes remount the slide (keyed by hash) and the
+    // ResizeObserver catches everything else. Without a deps array this
+    // re-created observers + settle timers on every fragment-step re-render.
+  }, []);
 
   return (
     <div ref={outerRef} className={`fit-outer fit-${align}`}>

@@ -12,8 +12,8 @@ interface UiState {
   audienceLastSeenAt: number;
   timerStart: number | null; // ms epoch when started; null = stopped
   timerAccum: number; // accumulated paused time (ms)
+  /** Theme id previewed on hover in the ThemePicker; null = use the deck's theme. */
   themeOverride: string | null;
-  codeTheme: string;
 
   // Feature panels
   slideJumperOpen: boolean;
@@ -36,7 +36,6 @@ interface UiState {
   resetTimer(): void;
   getElapsed(): number;
   setThemeOverride(t: string | null): void;
-  setCodeTheme(t: string): void;
 
   setSlideJumperOpen(b: boolean): void;
   setOverviewOpen(b: boolean): void;
@@ -55,7 +54,6 @@ export const useUiStore = create<UiState>((set, get) => ({
   timerStart: null,
   timerAccum: 0,
   themeOverride: null,
-  codeTheme: 'catppuccin-mocha',
   slideJumperOpen: false,
   overviewOpen: false,
   recentDecksOpen: false,
@@ -68,7 +66,9 @@ export const useUiStore = create<UiState>((set, get) => ({
   prevSlide: () => set((s) => ({ currentSlide: Math.max(0, s.currentSlide - 1), fragmentStep: 0 })),
   setFragmentStep: (n) => set({ fragmentStep: Math.max(0, n) }),
   setBlank: (mode) => set({ blankMode: mode }),
-  setPresenting: (p) => set({ isPresenting: p }),
+  // Entering/leaving present mode clears any armed blank screen so the show
+  // never starts on an unexplained black frame.
+  setPresenting: (p) => set({ isPresenting: p, blankMode: 'off' }),
   setAudienceConnected: (c) => set({ audienceConnected: c, audienceLastSeenAt: c ? Date.now() : 0 }),
   markAudienceSeen: () => set({ audienceConnected: true, audienceLastSeenAt: Date.now() }),
   startTimer: () => set((s) => (s.timerStart ? s : { timerStart: Date.now() })),
@@ -83,7 +83,6 @@ export const useUiStore = create<UiState>((set, get) => ({
     return timerAccum + (timerStart ? Date.now() - timerStart : 0);
   },
   setThemeOverride: (t) => set({ themeOverride: t }),
-  setCodeTheme: (t) => set({ codeTheme: t }),
 
   setSlideJumperOpen: (b) => set({ slideJumperOpen: b }),
   setOverviewOpen: (b) => set({ overviewOpen: b }),

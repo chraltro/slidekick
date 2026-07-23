@@ -13,6 +13,7 @@ import { SortableContext, useSortable, arrayMove, verticalListSortingStrategy } 
 import { CSS } from '@dnd-kit/utilities';
 import type { SlideAST, DeckConfig } from '@/slides/types';
 import { RenderSlide } from '@/slides/renderSlide';
+import { ErrorBoundary } from '@/ui/ErrorBoundary';
 
 const THUMB_W = 192;
 const THUMB_H = 108;
@@ -36,7 +37,16 @@ export function ThumbnailRail() {
     const slides = arrayMove(parsed.slides, oldIndex, newIndex);
     const fmEnd = parsed.slides[0]?.range.start ?? 0;
     const frontmatter = source.slice(0, fmEnd);
-    const reassembled = frontmatter + slides.map((s) => source.slice(s.range.start, s.range.end)).join('');
+    // Slide ranges exclude the `***` separator lines and the final slide has
+    // no trailing newline, so naive slice-concatenation merges slides. Rebuild
+    // each piece with normalized spacing and re-emit `***` before any slide
+    // that doesn't start with an H1 (it needs the explicit break to stay a
+    // separate slide).
+    const pieces = slides.map((s) => {
+      const body = source.slice(s.range.start, s.range.end).replace(/\s+$/, '');
+      return /^#\s/.test(body.trimStart()) ? body : `***\n\n${body}`;
+    });
+    const reassembled = frontmatter + pieces.join('\n\n') + '\n';
     setSource(reassembled);
     setCurrentSlide(newIndex);
   }
@@ -126,7 +136,9 @@ function Thumb({
             transformOrigin: 'top left',
           }}
         >
-          <RenderSlide slide={slide} config={config} totalSlides={total} showPageNumber={false} />
+          <ErrorBoundary resetKey={slide.hash}>
+            <RenderSlide slide={slide} config={config} totalSlides={total} showPageNumber={false} />
+          </ErrorBoundary>
         </div>
         {/* Click-blocker overlay so dnd-kit gets the events instead of slide internals */}
         <div className="absolute inset-0" />

@@ -8,7 +8,7 @@ export default function TwoColumnLayout({ slide }: { slide: SlideAST }) {
     <div className="layout-two-column">
       {headerHtml && <div className="col-header" dangerouslySetInnerHTML={{ __html: headerHtml }} />}
       <div className="col"><EnhancedHtml html={leftHtml} /></div>
-      <div className="col"><EnhancedHtml html={rightHtml || leftHtml ? rightHtml : leftHtml} /></div>
+      <div className="col"><EnhancedHtml html={rightHtml} /></div>
     </div>
   );
 }

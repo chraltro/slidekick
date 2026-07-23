@@ -28,11 +28,14 @@ export function PresenterPanel({ onSetSlideLayout }: Props) {
   const timerStart = useUiStore((s) => s.timerStart);
   const getElapsed = useUiStore((s) => s.getElapsed);
 
+  // Tick only while the timer is actually running; when stopped, the
+  // accumulated time is static and re-rendering twice a second is waste.
   const [, force] = useState(0);
   useEffect(() => {
+    if (!timerStart) return;
     const t = setInterval(() => force((n) => n + 1), 500);
     return () => clearInterval(t);
-  }, []);
+  }, [timerStart]);
 
   const slide = parsed.slides[currentSlide];
   const total = parsed.slides.length;

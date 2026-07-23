@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useUiStore } from '@/state/useUiStore';
 import { useDeckStore } from '@/state/useDeckStore';
 import { RenderSlide } from '@/slides/renderSlide';
@@ -9,6 +10,21 @@ export function Overview() {
   const setCurrent = useUiStore((s) => s.setCurrentSlide);
   const parsed = useDeckStore((s) => s.parsed);
 
+  // Document-level listener: the container div is never focused, so an
+  // onKeyDown prop would not receive Esc. Capture + stopPropagation keeps the
+  // global 'o' toggle from immediately reopening the overview.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' || e.key === 'o' || e.key === 'O') {
+        e.stopPropagation();
+        setOpen(false);
+      }
+    };
+    document.addEventListener('keydown', onKey, true);
+    return () => document.removeEventListener('keydown', onKey, true);
+  }, [open, setOpen]);
+
   if (!open) return null;
 
   const aspect = parsed.config.aspect ?? '16:9';
@@ -18,13 +34,7 @@ export function Overview() {
   const scale = targetW / baseW;
 
   return (
-    <div
-      className="fixed inset-0 z-[1500] bg-chrome-bg overflow-auto app-scroll"
-      onKeyDown={(e) => {
-        if (e.key === 'Escape' || e.key === 'o' || e.key === 'O') setOpen(false);
-      }}
-      tabIndex={-1}
-    >
+    <div className="fixed inset-0 z-[1500] bg-chrome-bg overflow-auto app-scroll">
       <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-3 bg-chrome-surface/90 backdrop-blur border-b border-chrome-border">
         <div className="text-sm text-chrome-fg">
           Overview · <span className="text-chrome-muted">{parsed.slides.length} slides</span>

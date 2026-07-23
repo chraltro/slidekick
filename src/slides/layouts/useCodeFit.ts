@@ -36,5 +36,7 @@ export function useCodeFit(rootRef: RefObject<HTMLElement | null>) {
       mo.disconnect();
       ro.disconnect();
     };
-  });
+    // Mount-only: the MutationObserver + ResizeObserver already re-fit on any
+    // content or size change; re-running per render just rebuilt them.
+  }, [rootRef]);
 }

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { putAsset } from '@/storage/assetStore';
 import { useDeckStore } from '@/state/useDeckStore';
+import { getActiveEditorView } from './CodeMirrorEditor';
 
 /** Listens for image paste/drop on the editor pane and inserts asset:<hash> markdown. */
 export function useImagePaste(rootRef: React.RefObject<HTMLElement>) {
@@ -45,6 +46,19 @@ function preventDefault(e: Event) {
 }
 
 function insertMd(snippet: string) {
+  // Insert at the cursor — the editor's update listener propagates the change
+  // to the store. Appending to the source instead would dump the image on the
+  // last slide and reset the cursor via the full-document sync.
+  const view = getActiveEditorView();
+  if (view) {
+    const pos = view.state.selection.main.head;
+    view.dispatch({
+      changes: { from: pos, insert: snippet },
+      selection: { anchor: pos + snippet.length },
+    });
+    view.focus();
+    return;
+  }
   const state = useDeckStore.getState();
-  useDeckStore.getState().setSource(state.source + snippet);
+  state.setSource(state.source + snippet);
 }

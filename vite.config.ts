@@ -13,8 +13,8 @@ export default defineConfig({
         name: 'md-presentations',
         short_name: 'mdpres',
         description: 'Markdown-driven presentations. Live edit while presenting.',
-        theme_color: '#1e1e2e',
-        background_color: '#1e1e2e',
+        theme_color: '#0e0e13',
+        background_color: '#0e0e13',
         display: 'standalone',
         start_url: '/',
         icons: [

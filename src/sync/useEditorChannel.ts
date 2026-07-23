@@ -14,6 +14,10 @@ const AUDIENCE_TIMEOUT = 5000;
 export function useEditorChannel() {
   const revRef = useRef(0);
   const lastSentHashesRef = useRef<string[]>([]);
+  // Slide hashes only cover slide bodies — config (theme, footer, pageNumber,
+  // customCss, …) and the title change without any hash changing, and the
+  // audience must still hear about it.
+  const lastSentConfigRef = useRef('');
 
   const setCurrentSlide = useUiStore((s) => s.setCurrentSlide);
   const setBlank = useUiStore((s) => s.setBlank);
@@ -79,16 +83,18 @@ export function useEditorChannel() {
     };
     ch.post(msg);
     lastSentHashesRef.current = state.parsed.slides.map((s) => s.hash);
+    lastSentConfigRef.current = JSON.stringify(state.parsed.config) + state.title;
   }
 
   useEffect(() => {
     const ch = getChannel();
     const slides = parsed.slides;
     const lastHashes = lastSentHashesRef.current;
+    const configKey = JSON.stringify(parsed.config) + title;
     revRef.current++;
 
-    // First publish or major change → full STATE
-    if (lastHashes.length !== slides.length) {
+    // First publish, slide count change, or config/title change → full STATE
+    if (lastHashes.length !== slides.length || configKey !== lastSentConfigRef.current) {
       ch.post({
         type: 'STATE',
         deckId,
@@ -100,6 +106,7 @@ export function useEditorChannel() {
         rev: revRef.current,
       });
       lastSentHashesRef.current = slides.map((s) => s.hash);
+      lastSentConfigRef.current = configKey;
       return;
     }
 

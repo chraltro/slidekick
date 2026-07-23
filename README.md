@@ -157,14 +157,17 @@ Features: language label, copy button, line highlighting via `{1,3-5}`, optional
 |---|---|
 | Cmd/Ctrl+P | Toggle Present mode |
 | Cmd/Ctrl+Shift+P | Open Audience window |
-| Cmd/Ctrl+S | Save (autosaves on every keystroke; this is just the visual confirm) |
+| Cmd/Ctrl+K | Jump to slide (fuzzy search) |
+| Cmd/Ctrl+S | Save now (also autosaves 400ms after every change) |
 | Cmd/Ctrl+E | Export self-contained HTML |
-| → / Space / PgDn | Next slide |
+| → / Space / PgDn | Next slide (steps through fragments first) |
 | ← / PgUp | Previous slide |
 | Home / End | First / last slide |
-| 1-9 | Jump to slide N |
-| B / `.` | Blank screen (black) |
-| W | Blank screen (white) |
+| 1-9 | Jump to slide N (while presenting) |
+| O | Overview grid of all slides |
+| D | Toggle draw mode (while presenting) |
+| B / `.` | Blank screen, black (while presenting) |
+| W | Blank screen, white (while presenting) |
 | F | Toggle fullscreen |
 | Esc | Exit present / fullscreen |
 

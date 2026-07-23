@@ -56,8 +56,12 @@ export function ensureCustomThemesLoaded(): Promise<void> {
         syncStyleTag();
         emit();
       })
-      .catch(() => {
+      .catch((e) => {
+        console.error('[themes] failed to load custom themes', e);
         loaded = true;
+        // Allow the next subscriber to retry — a transient IndexedDB failure
+        // should not leave custom-themed decks unstyled for the whole session.
+        initPromise = null;
       });
   }
   return initPromise;

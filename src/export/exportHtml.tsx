@@ -96,8 +96,11 @@ export async function exportDeckHtml(deck: ParsedDeck, title: string): Promise<s
   // Live, customCss is applied via style.textContent (no HTML parsing). In the
   // export it is concatenated into a <style> in the template, so a crafted
   // `</style><script>…` would break out and run when the file is opened.
-  // Neutralize the only sequences that can close the element.
+  // Neutralize the only sequences that can close the element. Theme CSS gets
+  // the same treatment: a custom theme's extraCss is user-imported content
+  // (.mdtheme.json files can come from anyone).
   const userCss = (deck.config.customCss ?? '').replace(/<\/(style|script)/gi, '<\\/$1');
+  themeCss = themeCss.replace(/<\/(style|script)/gi, '<\\/$1');
 
   // IMPORTANT: use a function replacement for every token. A plain-string
   // replacement value would have its `$` sequences ($&, $1, $$, …) interpreted
@@ -151,9 +154,8 @@ async function renderSlideToString(
     // must run before renderMermaid (it converts mermaid placeholders into
     // `.mermaid` divs that renderMermaid then renders).
     await enhanceCodeBlocks(slideEl, codeTheme);
-    renderIcons(slideEl);
     renderCharts(slideEl);
-    await Promise.all([renderMath(slideEl), renderMermaid(slideEl)]);
+    await Promise.all([renderIcons(slideEl), renderMath(slideEl), renderMermaid(slideEl)]);
 
     // Strip transition animation classes — a static export shouldn't replay an
     // entrance animation on every navigation. The runtime just toggles display.
@@ -219,7 +221,9 @@ async function resolveToDataUri(src: string): Promise<string | null> {
     } catch {
       result = null; // keep the original URL
     }
-    remoteUriCache.set(src, result);
+    // Only cache successes: a transient failure (offline, timeout) must not
+    // poison every later export in the session with a non-inlined image.
+    if (result !== null) remoteUriCache.set(src, result);
     return result;
   }
   return null;

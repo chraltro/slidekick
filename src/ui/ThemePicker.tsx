@@ -4,6 +4,7 @@ import { THEMES, type ThemeInfo } from '@/themes/index';
 import { useCustomThemes } from '@/themes/useCustomThemes';
 import { themeToThemeInfo, isCustomThemeId } from '@/themes/customThemes';
 import { ThemeEditor } from '@/editor/ThemeEditor';
+import { useUiStore } from '@/state/useUiStore';
 import clsx from 'clsx';
 import { Button } from './Button';
 import { Palette, Plus, Pencil } from 'lucide-react';
@@ -24,14 +25,24 @@ export function ThemePicker({ current, onPick }: Props) {
   const customThemes = useCustomThemes();
   const customInfos = useMemo(() => customThemes.map(themeToThemeInfo), [customThemes]);
   const allThemes = useMemo(() => [...THEMES, ...customInfos], [customInfos]);
+  // Hover preview goes through the UI store, NOT onPick: rewriting the
+  // frontmatter per hovered swatch would add an undo-history entry and an
+  // autosave write for every mouse move across the grid.
+  const setThemeOverride = useUiStore((s) => s.setThemeOverride);
 
   const active = allThemes.find((t) => t.id === current) ?? THEMES[0];
 
   function commit(t: ThemeInfo) {
     onPick(t.id);
-    setHover(null);
     setOpen(false);
   }
+
+  // Any close path (commit, click-outside, Esc) drops the preview override.
+  useEffect(() => {
+    if (open) return;
+    setHover(null);
+    setThemeOverride(null);
+  }, [open, setThemeOverride]);
 
   // Recompute popup anchor on open + on resize/scroll while open.
   useLayoutEffect(() => {
@@ -57,16 +68,10 @@ export function ThemePicker({ current, onPick }: Props) {
       const target = e.target as Node;
       if (popupRef.current?.contains(target)) return;
       if (triggerRef.current?.contains(target)) return;
-      if (hover && hover !== current) onPick(current);
-      setHover(null);
       setOpen(false);
     }
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        if (hover && hover !== current) onPick(current);
-        setHover(null);
-        setOpen(false);
-      }
+      if (e.key === 'Escape') setOpen(false);
     }
     document.addEventListener('mousedown', onDocClick);
     document.addEventListener('keydown', onKey);
@@ -74,7 +79,7 @@ export function ThemePicker({ current, onPick }: Props) {
       document.removeEventListener('mousedown', onDocClick);
       document.removeEventListener('keydown', onKey);
     };
-  }, [open, editor, hover, current, onPick]);
+  }, [open, editor]);
 
   const popupWidth = 680;
   const popupTop = anchorRect ? anchorRect.bottom + 8 : 0;
@@ -106,7 +111,11 @@ export function ThemePicker({ current, onPick }: Props) {
                     aria-label={`Theme: ${t.name}`}
                     onMouseEnter={() => {
                       setHover(t.id);
-                      onPick(t.id);
+                      setThemeOverride(t.id);
+                    }}
+                    onFocus={() => {
+                      setHover(t.id);
+                      setThemeOverride(t.id);
                     }}
                     onClick={() => commit(t)}
                     className={clsx(
@@ -141,6 +150,7 @@ export function ThemePicker({ current, onPick }: Props) {
                         title="Edit theme"
                         onClick={(e) => {
                           e.stopPropagation();
+                          setThemeOverride(null);
                           setEditor({ editingId: t.id });
                         }}
                         onMouseEnter={(e) => e.stopPropagation()}
@@ -156,7 +166,10 @@ export function ThemePicker({ current, onPick }: Props) {
               {/* Create-new card */}
               <button
                 aria-label="Create new theme"
-                onMouseEnter={() => setHover(null)}
+                onMouseEnter={() => {
+                  setHover(null);
+                  setThemeOverride(null);
+                }}
                 onClick={() => setEditor({})}
                 className="h-[124px] rounded-md border border-dashed border-chrome-border hover:border-chrome-accent text-chrome-muted hover:text-chrome-fg flex flex-col items-center justify-center gap-1.5 transition"
               >

@@ -16,6 +16,7 @@ import { SlideJumper } from './SlideJumper';
 import { Overview } from './Overview';
 import { RecentDecks } from './RecentDecks';
 import { DrawOverlay } from './DrawOverlay';
+import { isInsideFence } from '@/slides/parser';
 import type { Layout } from '@/slides/types';
 
 export default function EditorApp() {
@@ -27,6 +28,19 @@ export default function EditorApp() {
   const isPresenting = useUiStore((s) => s.isPresenting);
   const audienceConnected = useUiStore((s) => s.audienceConnected);
   const blankMode = useUiStore((s) => s.blankMode);
+  const themeOverride = useUiStore((s) => s.themeOverride);
+
+  // Theme-picker hover preview: swap the theme locally without touching the
+  // markdown source (writing on hover would pollute undo history and trigger
+  // an autosave per swatch). Only the local preview uses this — thumbnails
+  // and the audience window keep the real config.
+  const previewConfig = themeOverride ? { ...parsed.config, theme: themeOverride } : parsed.config;
+
+  // Lets index.html chrome (the demant.app link) hide itself during a show.
+  useEffect(() => {
+    document.body.classList.toggle('presenting', isPresenting);
+    return () => document.body.classList.remove('presenting');
+  }, [isPresenting]);
 
   const editorRootRef = useRef<HTMLDivElement | null>(null);
 
@@ -66,17 +80,26 @@ export default function EditorApp() {
     const slide = parsed.slides[slideIndex];
     if (!slide) return;
     const slideSrc = source.slice(slide.range.start, slide.range.end);
-    let updated;
-    if (/<!--\s*[^>]*\blayout\s*:/i.test(slideSrc)) {
-      updated = slideSrc.replace(
-        /<!--([\s\S]*?)-->/,
-        (_full, inner) => {
-          if (/\blayout\s*:/i.test(inner)) {
-            return `<!--${inner.replace(/layout\s*:\s*[^;]+/i, `layout: ${layout}`)}-->`;
-          }
-          return `<!--${inner}; layout: ${layout}-->`;
-        },
-      );
+    // Find the real layout directive, skipping comments inside code fences —
+    // those are literal syntax examples, and rewriting one would corrupt the
+    // author's code sample instead of setting the layout.
+    const re = /<!--([\s\S]*?)-->/g;
+    let m: RegExpExecArray | null;
+    let target: RegExpExecArray | null = null;
+    while ((m = re.exec(slideSrc)) !== null) {
+      if (isInsideFence(slideSrc, m.index)) continue;
+      if (/\blayout\s*:/i.test(m[1])) {
+        target = m;
+        break;
+      }
+    }
+    let updated: string;
+    if (target) {
+      const inner = target[1].replace(/layout\s*:\s*[^;]+/i, `layout: ${layout}`);
+      updated =
+        slideSrc.slice(0, target.index) +
+        `<!--${inner}-->` +
+        slideSrc.slice(target.index + target[0].length);
     } else {
       const lines = slideSrc.split('\n');
       const headingIdx = lines.findIndex((l) => /^#{1,2}\s/.test(l));
@@ -125,7 +148,7 @@ export default function EditorApp() {
         ) : blankMode === 'white' ? (
           <div className="absolute inset-0 bg-white" />
         ) : (
-          slide && <SlideStage slide={slide} config={parsed.config} totalSlides={parsed.slides.length} showPageNumber={parsed.config.pageNumber} />
+          slide && <SlideStage slide={slide} config={previewConfig} totalSlides={parsed.slides.length} showPageNumber={parsed.config.pageNumber} />
         )}
         <DrawOverlay />
         <div className="absolute bottom-2 right-2 text-xs text-white/40 select-none pointer-events-none">
@@ -165,12 +188,16 @@ export default function EditorApp() {
               style={{
                 aspectRatio:
                   parsed.config.aspect === '4:3' ? '4 / 3' : parsed.config.aspect === '1:1' ? '1 / 1' : '16 / 9',
-                width: 'min(100%, calc((100vh - 200px) * 16 / 9))',
+                // Width clamp must use the same ratio as aspectRatio above, or
+                // 4:3 and 1:1 decks overflow the pane vertically.
+                width: `min(100%, calc((100vh - 200px) * ${
+                  parsed.config.aspect === '4:3' ? '4 / 3' : parsed.config.aspect === '1:1' ? '1' : '16 / 9'
+                }))`,
               }}
             >
               <SlideStage
                 slide={slide}
-                config={parsed.config}
+                config={previewConfig}
                 totalSlides={parsed.slides.length}
                 showPageNumber={parsed.config.pageNumber}
               />

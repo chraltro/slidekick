@@ -1,6 +1,16 @@
 type MermaidApi = typeof import('mermaid').default;
 let mermaidPromise: Promise<MermaidApi> | null = null;
+// Rendered-SVG cache. Capped: while an author edits a diagram, every
+// intermediate source that renders successfully would otherwise accumulate a
+// full SVG string for the rest of the session.
 const cache = new Map<string, string>();
+const CACHE_MAX = 50;
+
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, (c) =>
+    c === '&' ? '&amp;' : c === '<' ? '&lt;' : c === '>' ? '&gt;' : c === '"' ? '&quot;' : '&#39;',
+  );
+}
 
 async function loadMermaid(): Promise<MermaidApi> {
   if (!mermaidPromise) {
@@ -8,7 +18,10 @@ async function loadMermaid(): Promise<MermaidApi> {
       m.default.initialize({
         startOnLoad: false,
         theme: 'dark',
-        securityLevel: 'loose',
+        // 'strict' lets mermaid sanitize label text itself. Diagram source is
+        // user/LLM-authored and this SVG lands in innerHTML after the parser's
+        // sanitize pass has already run, so nothing else guards this surface.
+        securityLevel: 'strict',
         // Use a standard sans-serif so mermaid's text-width measurement
         // matches the rendered glyphs (mismatch causes label truncation).
         fontFamily: '"Inter", "Trebuchet MS", "Helvetica Neue", Arial, sans-serif',
@@ -42,7 +55,7 @@ export async function renderMermaid(root: HTMLElement): Promise<void> {
   } catch (e) {
     console.error('[mermaid] failed to load library', e);
     for (const b of blocks) {
-      b.innerHTML = `<pre style="color:#f87171;font-size:1rem">mermaid library failed to load: ${(e as Error).message}</pre>`;
+      b.innerHTML = `<pre style="color:#f87171;font-size:1rem">mermaid library failed to load: ${escapeHtml((e as Error).message)}</pre>`;
       b.dataset.processed = '1';
     }
     return;
@@ -67,10 +80,14 @@ export async function renderMermaid(root: HTMLElement): Promise<void> {
         const renderId = `mmd-${key}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
         const result = await mermaid.render(renderId, code);
         svg = result.svg;
+        if (cache.size >= CACHE_MAX) {
+          const oldest = cache.keys().next().value;
+          if (oldest !== undefined) cache.delete(oldest);
+        }
         cache.set(key, svg);
       } catch (e) {
         console.error('[mermaid] render failed for code:', code, e);
-        svg = `<pre style="color:#f87171;font-size:1rem;padding:1rem;background:rgba(248,113,113,0.1);border-radius:0.5rem">Mermaid error: ${(e as Error).message}\n\nSource:\n${code.replace(/[<>]/g, (c) => (c === '<' ? '&lt;' : '&gt;'))}</pre>`;
+        svg = `<pre style="color:#f87171;font-size:1rem;padding:1rem;background:rgba(248,113,113,0.1);border-radius:0.5rem">Mermaid error: ${escapeHtml((e as Error).message)}\n\nSource:\n${escapeHtml(code)}</pre>`;
       }
     }
     block.innerHTML = svg;
