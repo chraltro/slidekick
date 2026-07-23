@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { SlideAST, DeckConfig } from './types';
 import Title from './layouts/Title';
 import Content from './layouts/Content';
@@ -38,7 +39,15 @@ export function RenderSlide({ slide, config, totalSlides, showPageNumber }: Rend
   const aspectClass =
     aspect === '4:3' ? 'aspect-4-3' : aspect === '1:1' ? 'aspect-1-1' : 'aspect-16-9';
   const fragmentStep = useUiStore((s) => s.fragmentStep);
-  const transition = config.transition ?? 'fade';
+  // Editing remounts the slide (key={slide.hash}), which would replay the
+  // entry animation on every keystroke. Only animate when the slide index
+  // changes, i.e. actual navigation.
+  const prevIndexRef = useRef<number | null>(null);
+  const navigated = prevIndexRef.current !== slide.index;
+  useEffect(() => {
+    prevIndexRef.current = slide.index;
+  });
+  const transition = navigated ? (config.transition ?? 'fade') : 'none';
 
   const inlineStyle: React.CSSProperties = {};
   if (slide.meta.bg) inlineStyle.background = slide.meta.bg;
