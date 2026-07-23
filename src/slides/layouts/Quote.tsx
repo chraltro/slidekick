@@ -13,7 +13,10 @@ export default function QuoteLayout({ slide }: { slide: SlideAST }) {
         {headerHtml && (
           <div className="quote-header" dangerouslySetInnerHTML={{ __html: headerHtml }} />
         )}
-        <blockquote dangerouslySetInnerHTML={{ __html: quoteHtml ?? '' }} />
+        {/* Route through EnhancedHtml so code / math / mermaid that happen to
+            live inside the blockquote still get processed (a raw
+            dangerouslySetInnerHTML would leave placeholders unrendered). */}
+        <EnhancedHtml html={`<blockquote>${quoteHtml ?? ''}</blockquote>`} />
         {finalAttribution && <div className="attribution">{finalAttribution}</div>}
         {restHasContent && (
           <div className="quote-rest">

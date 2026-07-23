@@ -407,8 +407,36 @@ function applyFragments(html: string): string {
   });
 }
 
+// Raw HTML is allowed in slides (html: true) so authors can drop in the odd
+// <div>/<sup>/<br>. But rendered markdown is fed to dangerouslySetInnerHTML, so
+// untrusted decks (e.g. pasted from an LLM) could smuggle in active content.
+// Strip the dangerous surface — script-like elements, event-handler attributes,
+// and javascript:/data:text/html URLs — while leaving benign markup intact.
+const DANGEROUS_TAGS = 'script,iframe,object,embed,style,link,meta,base,form,frame,frameset,noscript';
+const DANGEROUS_URL = /^\s*(?:javascript|vbscript|data:text\/html)/i;
+
+function sanitizeHtml(html: string): string {
+  if (typeof DOMParser === 'undefined') return html; // non-DOM environments
+  const doc = new DOMParser().parseFromString(`<body>${html}</body>`, 'text/html');
+  doc.querySelectorAll(DANGEROUS_TAGS).forEach((el) => el.remove());
+  doc.querySelectorAll('*').forEach((el) => {
+    for (const attr of Array.from(el.attributes)) {
+      const name = attr.name.toLowerCase();
+      if (name.startsWith('on')) {
+        el.removeAttribute(attr.name);
+      } else if (
+        (name === 'href' || name === 'src' || name === 'xlink:href' || name === 'formaction' || name === 'action') &&
+        DANGEROUS_URL.test(attr.value)
+      ) {
+        el.removeAttribute(attr.name);
+      }
+    }
+  });
+  return doc.body.innerHTML;
+}
+
 function renderSlideHtml(cleaned: string): string {
-  return applyFragments(md.render(cleaned));
+  return applyFragments(sanitizeHtml(md.render(cleaned)));
 }
 
 /**
