@@ -68,13 +68,44 @@ export function fitScale(outer: HTMLElement, inner: HTMLElement, steps: number[]
 export function fitCode(root: HTMLElement, steps: number[] = CODE_STEPS): void {
   const pre = root.querySelector<HTMLElement>('.codeblock pre');
   if (!pre) return;
+  // The <code> child carries `white-space: pre`, so wrapping must be set there
+  // too (not just on <pre>).
+  const code = pre.querySelector<HTMLElement>('code') ?? pre;
+  const setWrap = (on: boolean) => {
+    for (const el of [pre, code]) {
+      if (on) {
+        el.style.setProperty('white-space', 'pre-wrap', 'important');
+        el.style.setProperty('overflow-wrap', 'anywhere', 'important');
+      } else {
+        el.style.removeProperty('white-space');
+        el.style.removeProperty('overflow-wrap');
+      }
+    }
+  };
+  // Reset any prior fit so measurement starts from the stylesheet default.
   pre.style.removeProperty('font-size');
+  setWrap(false);
   const base = parseFloat(getComputedStyle(pre).fontSize) || 32;
-  const fits = () =>
+  const fitsBoth = () =>
     pre.scrollHeight <= pre.clientHeight + 1 && pre.scrollWidth <= pre.clientWidth + 1;
-  if (fits()) return;
+  const fitsHeight = () => pre.scrollHeight <= pre.clientHeight + 1;
+  if (fitsBoth()) return;
+
+  // First, shrink the font to fit both axes without wrapping (crisp code).
   for (let i = 1; i < steps.length; i++) {
     pre.style.setProperty('font-size', `${base * steps[i]}px`, 'important');
-    if (fits()) break;
+    if (fitsBoth()) return;
+  }
+
+  // Still too wide even at the smallest font (a single enormous line): wrap as
+  // a last resort so all the code is visible, then fit height.
+  if (pre.scrollWidth > pre.clientWidth + 1) {
+    setWrap(true);
+    pre.style.removeProperty('font-size');
+    if (fitsHeight()) return;
+    for (let i = 1; i < steps.length; i++) {
+      pre.style.setProperty('font-size', `${base * steps[i]}px`, 'important');
+      if (fitsHeight()) return;
+    }
   }
 }
