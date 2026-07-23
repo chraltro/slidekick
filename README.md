@@ -1,9 +1,9 @@
-# md-presentations
+# Slidekick
 
-> A PowerPoint alternative for the LLM era. Markdown in, browser-native slides out.
+> Your presentation sidekick. Markdown in, browser-native slides out.
 > Edit the deck **while you're presenting**. Audience sees changes live.
 
-`md-presentations` is a local-first, offline-capable web app that turns Markdown into a polished slide deck. You can paste an outline from Claude/GPT, hit Present, and stop fiddling with PPTX. The killer feature: open the audience window, screen-share *just that window* in Teams/Zoom, and keep editing the source — your audience sees every change in real time.
+`Slidekick` (formerly md-presentations) is a local-first, offline-capable web app that turns Markdown into a polished slide deck. You can paste an outline from Claude/GPT, hit Present, and stop fiddling with PPTX. The killer feature: open the presentation window, screen-share *just that window* in Teams/Zoom, and keep editing the source, your audience sees every change in real time. Live at [slidekick.demant.app](https://slidekick.demant.app).
 
 ## Why
 

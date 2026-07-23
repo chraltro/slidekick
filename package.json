@@ -1,9 +1,9 @@
 {
-  "name": "md-presentations",
+  "name": "slidekick",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Markdown-driven, browser-native presentation tool. Live edit while presenting. PowerPoint alternative for the LLM era.",
+  "description": "Slidekick: your presentation sidekick. Markdown in, live-editable slides out. PowerPoint alternative for the LLM era.",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

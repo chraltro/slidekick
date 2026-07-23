@@ -3,7 +3,7 @@ name: Deploy to Coolify
 # Coolify's "Auto Deploy" toggle is UI-only and the app uses the public-repo
 # source (no GitHub App installation), so pushes don't reach Coolify by
 # themselves. This workflow calls the Coolify deploy API instead, which is the
-# same thing `bash coolify.sh deploy md-presentations` does locally.
+# same thing `bash coolify.sh deploy slidekick` does locally.
 
 on:
   push:

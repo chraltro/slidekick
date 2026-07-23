@@ -18,7 +18,7 @@ interface DeckState {
 }
 
 const DEFAULT_MARKDOWN = `---
-title: Welcome to md-presentations
+title: Welcome to Slidekick
 theme: catppuccin-mocha
 font: Inter
 mono: JetBrains Mono
@@ -26,9 +26,9 @@ aspect: 16:9
 pageNumber: true
 ---
 
-# md-presentations
+# Slidekick
 
-## A PowerPoint alternative for the LLM era
+## Your presentation sidekick. A PowerPoint alternative for the LLM era.
 
 # Why this exists
 
@@ -336,7 +336,7 @@ const initialDeck = parseDeck(DEFAULT_MARKDOWN);
 
 export const useDeckStore = create<DeckState>((set) => ({
   deckId: 'default',
-  title: 'Welcome to md-presentations',
+  title: 'Welcome to Slidekick',
   source: DEFAULT_MARKDOWN,
   parsed: initialDeck,
   dirty: false,

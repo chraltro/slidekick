@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'],
       manifest: {
-        name: 'md-presentations',
-        short_name: 'mdpres',
-        description: 'Markdown-driven presentations. Live edit while presenting.',
+        name: 'Slidekick',
+        short_name: 'Slidekick',
+        description: 'Your presentation sidekick. Markdown in, live-editable slides out.',
         theme_color: '#0e0e13',
         background_color: '#0e0e13',
         display: 'standalone',

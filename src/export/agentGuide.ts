@@ -1,11 +1,11 @@
 // A comprehensive guide an LLM agent can paste into context to author decks
-// for md-presentations. Lives as a string literal so it gets inlined without
+// for Slidekick. Lives as a string literal so it gets inlined without
 // any extra fetch round-trip and ships in the offline PWA bundle.
 
-export const AGENT_GUIDE = `# md-presentations — Agent Guide
+export const AGENT_GUIDE = `# Slidekick: Agent Guide
 
 This document is everything you need to write a complete, working
-presentation for the md-presentations tool. Paste it into your context.
+presentation for the Slidekick tool. Paste it into your context.
 The output should be a single Markdown file. Nothing else is required.
 
 ---

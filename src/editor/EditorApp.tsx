@@ -45,7 +45,7 @@ export default function EditorApp() {
     url.searchParams.set('role', 'audience');
     window.open(
       url.toString(),
-      'md-presentations-audience',
+      'slidekick-audience',
       'popup=yes,width=1280,height=720,menubar=no,toolbar=no,status=no',
     );
   }, []);

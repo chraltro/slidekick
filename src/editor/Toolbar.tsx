@@ -144,7 +144,7 @@ export function Toolbar({ onOpenAudience, audienceConnected }: Props) {
   return (
     <div className="flex items-center justify-between gap-3 px-3 py-2 border-b border-chrome-border bg-chrome-surface/60 backdrop-blur">
       <div className="flex items-center gap-3 min-w-0">
-        <div className="font-mono text-sm text-chrome-accent shrink-0 tracking-tight">md-pres</div>
+        <div className="font-mono text-sm text-chrome-accent shrink-0 tracking-tight">slidekick</div>
         <div className="h-4 w-px bg-chrome-border shrink-0" aria-hidden />
         <input
           value={title}
