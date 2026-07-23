@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { getChannel } from './channel';
 import type { SyncMessage, BlankMode } from './messages';
 import type { SlideAST, DeckConfig } from '@/slides/types';
+import { useUiStore } from '@/state/useUiStore';
 
 const HEARTBEAT_INTERVAL = 2000;
 
@@ -70,6 +71,9 @@ export function useAudienceChannel() {
         });
       } else if (msg.type === 'NAV') {
         setState((prev) => ({ ...prev, currentIndex: msg.index, rev: msg.rev }));
+        // Mirror the sender's fragment reveal into this window's local step
+        // (RenderSlide reads it from this window's UI store).
+        if (msg.fragment !== undefined) useUiStore.getState().setFragmentStep(msg.fragment);
       } else if (msg.type === 'BLANK') {
         setState((prev) => ({ ...prev, blankMode: msg.mode, rev: msg.rev }));
       } else if (msg.type === 'HEARTBEAT' && msg.from === 'editor') {
@@ -97,9 +101,10 @@ export function useAudienceChannel() {
   }, []);
 
   // Outbound nav helper for the audience window's hotkeys
-  function navigate(index: number) {
+  function navigate(index: number, fragment = 0) {
     const ch = getChannel();
-    ch.post({ type: 'NAV', index, from: 'audience', rev: state.rev + 1 });
+    useUiStore.getState().setFragmentStep(fragment);
+    ch.post({ type: 'NAV', index, from: 'audience', rev: state.rev + 1, fragment });
     setState((prev) => ({ ...prev, currentIndex: index }));
   }
 

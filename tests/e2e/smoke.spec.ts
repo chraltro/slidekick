@@ -140,7 +140,7 @@ test.describe('audience window opens via window.open', () => {
     await page.goto('/');
     await expect(page.locator('.cm-editor')).toBeVisible();
     const popupPromise = context.waitForEvent('page');
-    await page.getByRole('button', { name: /open audience/i }).first().click();
+    await page.getByRole('button', { name: /^present/i }).first().click();
     const popup = await popupPromise;
     await popup.waitForLoadState('domcontentloaded');
     expect(popup.url()).toContain('role=audience');

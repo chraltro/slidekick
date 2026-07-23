@@ -21,12 +21,9 @@ export function useGlobalShortcuts(openAudience: () => void) {
       const deck = useDeckStore.getState();
 
       if (meta && e.key.toLowerCase() === 'p') {
+        // Presenting IS the audience window — one flow, one shortcut.
         e.preventDefault();
-        if (e.shiftKey) {
-          openAudience();
-        } else {
-          ui.setPresenting(!ui.isPresenting);
-        }
+        openAudience();
         return;
       }
       if (meta && e.key.toLowerCase() === 'k') {
@@ -56,11 +53,6 @@ export function useGlobalShortcuts(openAudience: () => void) {
       if (e.key === 'o' || e.key === 'O') {
         e.preventDefault();
         ui.setOverviewOpen(!useUiStore.getState().overviewOpen);
-        return;
-      }
-      if ((e.key === 'd' || e.key === 'D') && ui.isPresenting) {
-        e.preventDefault();
-        ui.setDrawingMode(!useUiStore.getState().drawingMode);
         return;
       }
 
@@ -99,32 +91,10 @@ export function useGlobalShortcuts(openAudience: () => void) {
         case 'End':
           ui.setCurrentSlide(total - 1);
           break;
-        case 'Escape':
-          if (ui.isPresenting) {
-            ui.setPresenting(false);
-            document.exitFullscreen?.();
-          }
-          break;
-        case 'b':
-        case 'B':
-        case '.':
-          // Present-mode only: blanking while editing arms an invisible black
-          // screen that only shows up the next time Present is pressed.
-          if (ui.isPresenting) ui.setBlank(ui.blankMode === 'black' ? 'off' : 'black');
-          break;
-        case 'w':
-        case 'W':
-          if (ui.isPresenting) ui.setBlank(ui.blankMode === 'white' ? 'off' : 'white');
-          break;
-        case 'f':
-        case 'F':
-          if (document.fullscreenElement) document.exitFullscreen();
-          else document.documentElement.requestFullscreen();
-          break;
         default:
-          // Number keys jump straight to slide N while presenting, matching
-          // the audience window and the exported deck.
-          if (ui.isPresenting && /^[1-9]$/.test(e.key)) {
+          // Number keys jump straight to slide N, matching the audience
+          // window and the exported deck.
+          if (/^[1-9]$/.test(e.key)) {
             const idx = parseInt(e.key, 10) - 1;
             if (idx < total) ui.setCurrentSlide(idx);
           }

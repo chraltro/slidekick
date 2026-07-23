@@ -102,7 +102,7 @@ The renderer picks one automatically based on slide content shape (lone H1 → t
 
 ## The wedge feature: live edit while presenting
 
-1. Click **Open Audience**. A clean popup window opens with just the current slide.
+1. Click **Present**. A clean popup window opens with just the current slide.
 2. Drag that window onto your second monitor. Share it in Teams/Zoom (Window mode, not full screen).
 3. Keep editing the Markdown in the original window. Every change syncs to the audience window within ~150ms over `BroadcastChannel`. No flicker on unrelated slides.
 4. Press → in either window to advance. Both stay in sync. Press **B** for blank-black, **W** for blank-white, **F** for fullscreen.
@@ -153,23 +153,37 @@ Features: language label, copy button, line highlighting via `{1,3-5}`, optional
 
 ## Keyboard shortcuts
 
+Presenting happens in a dedicated window: "Present" (or Cmd/Ctrl+P) opens the
+presentation popup. Put it on the second monitor or share just that window in
+Teams/Zoom; the editor stays your presenter console (notes, timer, thumbnails)
+and every edit syncs live.
+
+Editor:
+
 | Key | Action |
 |---|---|
-| Cmd/Ctrl+P | Toggle Present mode |
-| Cmd/Ctrl+Shift+P | Open Audience window |
+| Cmd/Ctrl+P | Open the presentation window |
 | Cmd/Ctrl+K | Jump to slide (fuzzy search) |
 | Cmd/Ctrl+S | Save now (also autosaves 400ms after every change) |
 | Cmd/Ctrl+E | Export self-contained HTML |
 | → / Space / PgDn | Next slide (steps through fragments first) |
 | ← / PgUp | Previous slide |
-| Home / End | First / last slide |
-| 1-9 | Jump to slide N (while presenting) |
+| Home / End / 1-9 | First / last / Nth slide |
 | O | Overview grid of all slides |
-| D | Toggle draw mode (while presenting) |
-| B / `.` | Blank screen, black (while presenting) |
-| W | Blank screen, white (while presenting) |
+
+Presentation window (mirrors the editor, and is fully operable on its own):
+
+| Key | Action |
+|---|---|
+| → / Space / PgDn / L | Next slide (steps through fragments first) |
+| ← / PgUp / H | Previous slide |
+| Home / End / 1-9 | First / last / Nth slide |
+| O | Overview grid (click a slide to jump) |
+| D | Draw on the slide (C clears, 1-6 colors, D/Esc exits) |
+| B / `.` | Blank screen, black |
+| W | Blank screen, white |
 | F | Toggle fullscreen |
-| Esc | Exit present / fullscreen |
+| Esc | Exit fullscreen |
 
 ## Export
 

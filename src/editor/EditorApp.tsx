@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import { Toolbar } from './Toolbar';
 import { ThumbnailRail } from './ThumbnailRail';
 import { PresenterPanel } from './PresenterPanel';
@@ -15,7 +15,6 @@ import { useImagePaste } from './useImagePaste';
 import { SlideJumper } from './SlideJumper';
 import { Overview } from './Overview';
 import { RecentDecks } from './RecentDecks';
-import { DrawOverlay } from './DrawOverlay';
 import { isInsideFence } from '@/slides/parser';
 import type { Layout } from '@/slides/types';
 
@@ -25,9 +24,7 @@ export default function EditorApp() {
   const parsed = useDeckStore((s) => s.parsed);
   const currentSlide = useUiStore((s) => s.currentSlide);
   const setCurrentSlide = useUiStore((s) => s.setCurrentSlide);
-  const isPresenting = useUiStore((s) => s.isPresenting);
   const audienceConnected = useUiStore((s) => s.audienceConnected);
-  const blankMode = useUiStore((s) => s.blankMode);
   const themeOverride = useUiStore((s) => s.themeOverride);
 
   // Theme-picker hover preview: swap the theme locally without touching the
@@ -36,33 +33,12 @@ export default function EditorApp() {
   // and the audience window keep the real config.
   const previewConfig = themeOverride ? { ...parsed.config, theme: themeOverride } : parsed.config;
 
-  // Lets index.html chrome (the demant.app link) hide itself during a show.
-  useEffect(() => {
-    document.body.classList.toggle('presenting', isPresenting);
-    return () => document.body.classList.remove('presenting');
-  }, [isPresenting]);
-
   const editorRootRef = useRef<HTMLDivElement | null>(null);
 
   useThemeLoader(parsed.config.theme, parsed.config.customCss);
   useAutosave();
   useEditorChannel();
   useImagePaste(editorRootRef);
-
-  // Auto-advance / kiosk mode: when frontmatter has `autoAdvance: <seconds>`
-  // and we're presenting (and not paused), step forward every N seconds.
-  const autoAdvancePaused = useUiStore((s) => s.autoAdvancePaused);
-  useEffect(() => {
-    const seconds = parsed.config.autoAdvance;
-    if (!isPresenting || !seconds || seconds <= 0 || autoAdvancePaused) return;
-    const total = parsed.slides.length;
-    const id = window.setInterval(() => {
-      const cur = useUiStore.getState().currentSlide;
-      const next = (cur + 1) % total;
-      useUiStore.getState().setCurrentSlide(next);
-    }, seconds * 1000);
-    return () => window.clearInterval(id);
-  }, [isPresenting, parsed.config.autoAdvance, parsed.slides.length, autoAdvancePaused]);
 
   const openAudience = useCallback(() => {
     const url = new URL(window.location.href);
@@ -138,24 +114,6 @@ export default function EditorApp() {
     const minH = 0;
     const maxH = Math.max(minH, mainHeight - 240);
     return Math.max(minH, Math.min(maxH, next));
-  }
-
-  if (isPresenting) {
-    return (
-      <div className="fixed inset-0 bg-black">
-        {blankMode === 'black' ? (
-          <div className="absolute inset-0 bg-black" />
-        ) : blankMode === 'white' ? (
-          <div className="absolute inset-0 bg-white" />
-        ) : (
-          slide && <SlideStage slide={slide} config={previewConfig} totalSlides={parsed.slides.length} showPageNumber={parsed.config.pageNumber} />
-        )}
-        <DrawOverlay />
-        <div className="absolute bottom-2 right-2 text-xs text-white/40 select-none pointer-events-none">
-          {currentSlide + 1} / {parsed.slides.length} · Esc to exit · D draw · O overview
-        </div>
-      </div>
-    );
   }
 
   return (

@@ -9,7 +9,6 @@ import {
   Upload,
   FilePlus,
   Save,
-  RefreshCw,
   LayoutGrid,
   Search,
   Folder,
@@ -38,8 +37,6 @@ export function Toolbar({ onOpenAudience, audienceConnected }: Props) {
   const title = useDeckStore((s) => s.title);
   const setTitle = useDeckStore((s) => s.setTitle);
   const loadDeck = useDeckStore((s) => s.loadDeck);
-  const setPresenting = useUiStore((s) => s.setPresenting);
-  const isPresenting = useUiStore((s) => s.isPresenting);
   const dirty = useDeckStore((s) => s.dirty);
   const setSlideJumperOpen = useUiStore((s) => s.setSlideJumperOpen);
   const setOverviewOpen = useUiStore((s) => s.setOverviewOpen);
@@ -143,11 +140,6 @@ export function Toolbar({ onOpenAudience, audienceConnected }: Props) {
     input.click();
   }
 
-  function togglePresent() {
-    setPresenting(!isPresenting);
-    if (!isPresenting) document.documentElement.requestFullscreen?.();
-    else document.exitFullscreen?.();
-  }
 
   return (
     <div className="flex items-center justify-between gap-3 px-3 py-2 border-b border-chrome-border bg-chrome-surface/60 backdrop-blur">
@@ -187,16 +179,16 @@ export function Toolbar({ onOpenAudience, audienceConnected }: Props) {
         <ThemePicker current={parsed.config.theme} onPick={handleSetTheme} />
         <Button
           onClick={onOpenAudience}
-          variant={audienceConnected ? 'default' : 'primary'}
+          variant="primary"
           size="sm"
-          title={audienceConnected ? 'Audience window connected' : 'Open audience window (share in Teams/Zoom)'}
+          title={
+            audienceConnected
+              ? 'Presentation window is live — click to focus it'
+              : 'Present in a separate window; share that window in Teams/Zoom (Cmd/Ctrl+P)'
+          }
         >
-          {audienceConnected ? <RefreshCw size={14} /> : <Monitor size={14} />}
-          <span>{audienceConnected ? 'Audience live' : 'Open Audience'}</span>
-        </Button>
-        <Button onClick={togglePresent} variant="primary" size="sm" title="Present (Cmd/Ctrl+P)">
-          <Play size={14} />
-          <span>{isPresenting ? 'Stop' : 'Present'}</span>
+          {audienceConnected ? <Monitor size={14} /> : <Play size={14} />}
+          <span>{audienceConnected ? 'Presenting' : 'Present'}</span>
         </Button>
         <Button
           ref={exportTriggerRef}

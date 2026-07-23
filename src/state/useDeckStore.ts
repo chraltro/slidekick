@@ -296,23 +296,23 @@ Add per-slide notes with an HTML comment:
 
 ## Editor
 
-- \`Cmd/Ctrl + P\` present
-- \`Cmd/Ctrl + Shift + P\` open audience
+- \`Cmd/Ctrl + P\` present (opens the presentation window)
+- \`Cmd/Ctrl + K\` jump to slide
 - \`Cmd/Ctrl + E\` export HTML
 - \`Cmd/Ctrl + S\` save
 
 ---
 
-## When presenting
+## Presentation window
 
 - Arrow keys, space, PgUp/PgDn navigate
+- \`D\` draw, \`O\` overview
 - \`B\` blank black, \`W\` blank white
-- \`F\` fullscreen, \`Esc\` exit
-- Number keys jump to slide N
+- \`F\` fullscreen, number keys jump to slide N
 
 # Live edit, while presenting
 
-Click "Open Audience" in the toolbar. Drag the popup onto your second monitor. Share that window in Teams or Zoom.
+Click "Present" in the toolbar. Drag the popup onto your second monitor. Share that window in Teams or Zoom.
 
 Then keep editing. Every change syncs in real time.
 

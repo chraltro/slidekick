@@ -7,7 +7,6 @@ interface UiState {
   /** Index of the currently-revealed fragment within the current slide. */
   fragmentStep: number;
   blankMode: BlankMode;
-  isPresenting: boolean;
   audienceConnected: boolean;
   audienceLastSeenAt: number;
   timerStart: number | null; // ms epoch when started; null = stopped
@@ -20,15 +19,12 @@ interface UiState {
   overviewOpen: boolean;
   recentDecksOpen: boolean;
   drawingMode: boolean;
-  /** Auto-advance enabled in present mode (driven by deck frontmatter). */
-  autoAdvancePaused: boolean;
 
   setCurrentSlide(n: number): void;
   nextSlide(total: number): void;
   prevSlide(): void;
   setFragmentStep(n: number): void;
   setBlank(mode: BlankMode): void;
-  setPresenting(p: boolean): void;
   setAudienceConnected(c: boolean): void;
   markAudienceSeen(): void;
   startTimer(): void;
@@ -41,14 +37,12 @@ interface UiState {
   setOverviewOpen(b: boolean): void;
   setRecentDecksOpen(b: boolean): void;
   setDrawingMode(b: boolean): void;
-  setAutoAdvancePaused(b: boolean): void;
 }
 
 export const useUiStore = create<UiState>((set, get) => ({
   currentSlide: 0,
   fragmentStep: 0,
   blankMode: 'off',
-  isPresenting: false,
   audienceConnected: false,
   audienceLastSeenAt: 0,
   timerStart: null,
@@ -58,7 +52,6 @@ export const useUiStore = create<UiState>((set, get) => ({
   overviewOpen: false,
   recentDecksOpen: false,
   drawingMode: false,
-  autoAdvancePaused: false,
 
   setCurrentSlide: (n) => set({ currentSlide: Math.max(0, n), fragmentStep: 0 }),
   nextSlide: (total) =>
@@ -66,9 +59,6 @@ export const useUiStore = create<UiState>((set, get) => ({
   prevSlide: () => set((s) => ({ currentSlide: Math.max(0, s.currentSlide - 1), fragmentStep: 0 })),
   setFragmentStep: (n) => set({ fragmentStep: Math.max(0, n) }),
   setBlank: (mode) => set({ blankMode: mode }),
-  // Entering/leaving present mode clears any armed blank screen so the show
-  // never starts on an unexplained black frame.
-  setPresenting: (p) => set({ isPresenting: p, blankMode: 'off' }),
   setAudienceConnected: (c) => set({ audienceConnected: c, audienceLastSeenAt: c ? Date.now() : 0 }),
   markAudienceSeen: () => set({ audienceConnected: true, audienceLastSeenAt: Date.now() }),
   startTimer: () => set((s) => (s.timerStart ? s : { timerStart: Date.now() })),
@@ -88,5 +78,4 @@ export const useUiStore = create<UiState>((set, get) => ({
   setOverviewOpen: (b) => set({ overviewOpen: b }),
   setRecentDecksOpen: (b) => set({ recentDecksOpen: b }),
   setDrawingMode: (b) => set({ drawingMode: b }),
-  setAutoAdvancePaused: (b) => set({ autoAdvancePaused: b }),
 }));

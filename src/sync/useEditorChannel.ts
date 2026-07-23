@@ -30,6 +30,8 @@ export function useEditorChannel() {
     const unsub = ch.subscribe((msg: SyncMessage) => {
       if (msg.type === 'NAV' && msg.from === 'audience') {
         setCurrentSlide(msg.index);
+        // setCurrentSlide resets the fragment step; restore the sender's.
+        if (msg.fragment !== undefined) useUiStore.getState().setFragmentStep(msg.fragment);
       } else if (msg.type === 'BLANK' && msg.from === 'audience') {
         setBlank(msg.mode);
       } else if (msg.type === 'HEARTBEAT' && msg.from === 'audience') {
@@ -64,6 +66,7 @@ export function useEditorChannel() {
   const deckId = useDeckStore((s) => s.deckId);
   const title = useDeckStore((s) => s.title);
   const currentSlide = useUiStore((s) => s.currentSlide);
+  const fragmentStep = useUiStore((s) => s.fragmentStep);
   const blankMode = useUiStore((s) => s.blankMode);
 
   function publishStateNow() {
@@ -117,7 +120,7 @@ export function useEditorChannel() {
     }
     if (changed.length === 0) {
       // Still publish nav/blank in case those changed
-      ch.post({ type: 'NAV', index: currentSlide, from: 'editor', rev: revRef.current });
+      ch.post({ type: 'NAV', index: currentSlide, from: 'editor', rev: revRef.current, fragment: fragmentStep });
       ch.post({ type: 'BLANK', mode: blankMode, from: 'editor', rev: revRef.current });
       return;
     }
@@ -142,10 +145,10 @@ export function useEditorChannel() {
         config: parsed.config,
         rev: revRef.current,
       });
-      ch.post({ type: 'NAV', index: currentSlide, from: 'editor', rev: revRef.current });
+      ch.post({ type: 'NAV', index: currentSlide, from: 'editor', rev: revRef.current, fragment: fragmentStep });
     }
     lastSentHashesRef.current = slides.map((s) => s.hash);
-  }, [parsed, deckId, title, currentSlide, blankMode]);
+  }, [parsed, deckId, title, currentSlide, fragmentStep, blankMode]);
 
   return {
     publishStateNow,

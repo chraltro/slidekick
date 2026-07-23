@@ -189,7 +189,7 @@ test.describe('UX / visual inspection', () => {
     await page.waitForTimeout(500);
 
     const popupPromise = context.waitForEvent('page');
-    await page.getByRole('button', { name: /open audience/i }).first().click();
+    await page.getByRole('button', { name: /^present/i }).first().click();
     const popup = await popupPromise;
     await popup.waitForLoadState('domcontentloaded');
     await expect(popup.locator('.slide-canvas').first()).toBeVisible({ timeout: 5000 });

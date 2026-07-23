@@ -24,7 +24,7 @@ export type SyncMessage =
       config: DeckConfig;
       rev: number;
     }
-  | { type: 'NAV'; index: number; from: Role; rev: number }
+  | { type: 'NAV'; index: number; from: Role; rev: number; fragment?: number }
   | { type: 'BLANK'; mode: BlankMode; from: Role; rev: number }
   | { type: 'HEARTBEAT'; from: Role; t: number }
   | { type: 'HELLO'; from: Role };
