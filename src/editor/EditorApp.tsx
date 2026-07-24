@@ -139,7 +139,7 @@ export default function EditorApp() {
           getStart={() => editorW}
           onDrag={(next) => setEditorW(clampEditor(next))}
         />
-        <div className="min-h-0 min-w-0 bg-chrome-bg flex items-center justify-center p-6">
+        <main aria-label="Slide preview" className="min-h-0 min-w-0 bg-chrome-bg flex items-center justify-center p-6">
           <div className="w-full h-full max-w-full max-h-full flex items-center justify-center">
             <div
               className="relative shadow-2xl rounded-md overflow-hidden ring-1 ring-chrome-border"
@@ -161,7 +161,7 @@ export default function EditorApp() {
               />
             </div>
           </div>
-        </div>
+        </main>
         <DragHandle
           orientation="col"
           direction={-1}

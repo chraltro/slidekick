@@ -64,4 +64,5 @@ test('editor a11y: every interactive control has an accessible name', async ({ p
   expect(a11y.unnamed, `unnamed controls: ${JSON.stringify(a11y.unnamed)}`).toEqual([]);
   expect(a11y.imgsNoAlt, 'images without alt').toBe(0);
   expect(a11y.lang).toBe('en');
+  expect(a11y.hasMain, 'a <main> landmark is present').toBe(true);
 });
