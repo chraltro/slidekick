@@ -69,18 +69,29 @@ export function SlideJumper() {
     setOpen(false);
   }
 
+  const activeOptionId = filtered[active] ? `slidejumper-opt-${active}` : undefined;
+
   return createPortal(
     <div
       className="fixed inset-0 z-[2000] flex items-start justify-center pt-24 bg-black/50 backdrop-blur-sm"
       onClick={() => setOpen(false)}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Jump to slide"
         className="w-[640px] max-w-[90vw] bg-chrome-elevated border border-chrome-border rounded-lg shadow-2xl shadow-black/50 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <input
           ref={inputRef}
           value={query}
+          role="combobox"
+          aria-expanded
+          aria-controls="slidejumper-list"
+          aria-activedescendant={activeOptionId}
+          aria-autocomplete="list"
+          aria-label="Search slides"
           onChange={(e) => {
             setQuery(e.target.value);
             setActive(0);
@@ -101,13 +112,17 @@ export function SlideJumper() {
           placeholder="Jump to slide…"
           className="w-full px-4 py-3 bg-transparent border-b border-chrome-border text-base text-chrome-fg placeholder:text-chrome-subtle outline-none"
         />
-        <div className="max-h-[420px] overflow-auto app-scroll py-1">
+        <div id="slidejumper-list" role="listbox" aria-label="Slides" className="max-h-[420px] overflow-auto app-scroll py-1">
           {filtered.length === 0 && (
             <div className="px-4 py-6 text-sm text-chrome-muted">No slides match.</div>
           )}
           {filtered.map((r, idx) => (
             <button
               key={r.slide.hash + r.i}
+              id={`slidejumper-opt-${idx}`}
+              role="option"
+              aria-selected={idx === active}
+              tabIndex={-1}
               onClick={() => jump(r.i)}
               onMouseEnter={() => setActive(idx)}
               className={`w-full text-left px-4 py-2 flex items-center justify-between gap-3 transition-colors ${
