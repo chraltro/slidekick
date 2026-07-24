@@ -74,7 +74,10 @@ canvas — useful for one-off tweaks without authoring a full theme.
 
 ## 3. Per-slide metadata (HTML comments)
 
-Place an HTML comment near the top of a slide to override behavior:
+Place an HTML comment on the line **right after the slide's heading** to
+override its behavior. A directive must live inside the slide it targets:
+because every slide begins at its \`#\`/\`##\` heading, a comment placed *before*
+the heading attaches to the *previous* slide instead.
 
 \`\`\`md
 # How it works
