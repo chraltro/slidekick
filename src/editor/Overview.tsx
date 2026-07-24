@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useUiStore } from '@/state/useUiStore';
 import { useDeckStore } from '@/state/useDeckStore';
 import { RenderSlide } from '@/slides/renderSlide';
+import { ErrorBoundary } from '@/ui/ErrorBoundary';
 
 /** Press `O` (or click the overview button) to see all slides on one page. */
 export function Overview() {
@@ -75,7 +76,19 @@ export function Overview() {
                   transformOrigin: 'top left',
                 }}
               >
-                <RenderSlide slide={slide} config={parsed.config} totalSlides={parsed.slides.length} showPageNumber={false} />
+                <ErrorBoundary
+                  resetKey={slide.hash}
+                  fallback={() => (
+                    <div
+                      style={{ width: baseW, height: baseH }}
+                      className="flex items-center justify-center bg-chrome-surface text-chrome-muted text-4xl"
+                    >
+                      Slide failed to render
+                    </div>
+                  )}
+                >
+                  <RenderSlide slide={slide} config={parsed.config} totalSlides={parsed.slides.length} showPageNumber={false} />
+                </ErrorBoundary>
               </div>
             </div>
             <div className="px-3 py-2 text-xs flex items-center justify-between bg-chrome-surface border-t border-chrome-border">

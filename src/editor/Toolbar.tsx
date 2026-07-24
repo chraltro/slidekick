@@ -149,6 +149,7 @@ export function Toolbar({ onOpenAudience, audienceConnected }: Props) {
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          aria-label="Deck title"
           className="bg-transparent text-sm text-chrome-fg placeholder:text-chrome-subtle outline-none border-none px-1.5 py-0.5 -mx-1.5 rounded truncate min-w-0 transition-colors hover:bg-chrome-surface focus:bg-chrome-surface focus-visible:ring-1 focus-visible:ring-chrome-accent/50"
           placeholder="Untitled"
         />

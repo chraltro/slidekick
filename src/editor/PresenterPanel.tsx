@@ -47,10 +47,10 @@ export function PresenterPanel({ onSetSlideLayout }: Props) {
           Slide {currentSlide + 1} / {total} · {slide?.layout ?? '-'}
         </div>
         <div className="flex items-center gap-1 mt-1">
-          <Button size="sm" variant="ghost" onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}>
+          <Button size="sm" variant="ghost" title="Previous slide" onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}>
             <ChevronLeft size={14} />
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => setCurrentSlide(Math.min(total - 1, currentSlide + 1))}>
+          <Button size="sm" variant="ghost" title="Next slide" onClick={() => setCurrentSlide(Math.min(total - 1, currentSlide + 1))}>
             <ChevronRight size={14} />
           </Button>
           {slide && (
