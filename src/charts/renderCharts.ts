@@ -158,6 +158,11 @@ function renderLine(cfg: ChartConfig): string {
     }
   }
   if (labels.length === 0) return `<div class="chart-error">Empty chart data</div>`;
+  // Non-finite cells (e.g. a non-numeric YAML value) would make the whole scale
+  // NaN and drop every line; coerce them to 0.
+  series = Object.fromEntries(
+    Object.entries(series).map(([k, arr]) => [k, arr.map((v) => (Number.isFinite(Number(v)) ? Number(v) : 0))]),
+  );
 
   const palette = paletteFor(cfg);
   const allValues = Object.values(series).flat();
@@ -243,16 +248,22 @@ function renderPie(cfg: ChartConfig, donut = false): string {
   const W = 800;
   const H = 400;
 
+  // A pie only depicts non-negative magnitudes; clamp negatives to 0 and treat
+  // non-finite cells as 0 so they can't emit NaN path geometry.
+  const clean = (v: unknown) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? Math.max(0, n) : 0;
+  };
   let entries: [string, number][] = [];
   if (cfg.data && !Array.isArray(cfg.data)) {
-    entries = Object.entries(cfg.data).map(([k, v]) => [k, Number(v)]);
+    entries = Object.entries(cfg.data).map(([k, v]) => [k, clean(v)]);
   } else if (Array.isArray(cfg.data) && cfg.labels) {
     const arr = cfg.data;
-    entries = cfg.labels.map((l, i) => [l, Number(arr[i] ?? 0)]);
+    entries = cfg.labels.map((l, i) => [l, clean(arr[i])]);
   }
   if (entries.length === 0) return `<div class="chart-error">Empty chart data</div>`;
 
-  const total = entries.reduce((s, [, v]) => s + Math.max(0, v), 0) || 1;
+  const total = entries.reduce((s, [, v]) => s + v, 0) || 1;
   const palette = paletteFor(cfg);
   const cx = 200;
   const cy = H / 2 + 10;
