@@ -55,6 +55,9 @@ export function RecentDecks() {
       onClick={() => setOpen(false)}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Your decks"
         className="w-[560px] max-w-[90vw] bg-chrome-surface border border-chrome-border rounded-lg shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >

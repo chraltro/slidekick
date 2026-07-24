@@ -35,7 +35,7 @@ export function Overview() {
   const scale = targetW / baseW;
 
   return (
-    <div className="fixed inset-0 z-[1500] bg-chrome-bg overflow-auto app-scroll">
+    <div role="dialog" aria-modal="true" aria-label="Slide overview" className="fixed inset-0 z-[1500] bg-chrome-bg overflow-auto app-scroll">
       <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-3 bg-chrome-surface/90 backdrop-blur border-b border-chrome-border">
         <div className="text-sm text-chrome-fg">
           Overview · <span className="text-chrome-muted">{parsed.slides.length} slides</span>
