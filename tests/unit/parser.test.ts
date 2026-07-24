@@ -71,6 +71,29 @@ describe('sanitizer (via rendered slide html)', () => {
     expect(out).toContain('<sup>');
     expect(out).toContain('<div');
   });
+
+  it('strips a range of event-handler attributes', () => {
+    for (const attr of ['onload', 'onclick', 'onmouseover', 'onfocus', 'ontoggle', 'onanimationstart']) {
+      const out = html(`<div ${attr}="window.x=1">hi</div>`);
+      expect(out, attr).not.toMatch(new RegExp(attr, 'i'));
+    }
+  });
+
+  it('strips javascript: URLs regardless of case or leading space', () => {
+    expect(html('<a href="JAVASCRIPT:x=1">a</a>')).not.toMatch(/href="[^"]*javascript/i);
+    expect(html('<a href="  javascript:x=1">a</a>')).not.toMatch(/href="[^"]*javascript/i);
+  });
+
+  it('removes form/embed/object elements', () => {
+    expect(html('<form action="/x"><input></form>')).not.toContain('<form');
+    expect(html('<object data="x"></object>')).not.toContain('<object');
+    expect(html('<embed src="x">')).not.toContain('<embed');
+  });
+
+  it('neutralizes a javascript: URL on an svg <use>', () => {
+    const out = html('<svg><use href="javascript:x=1"/></svg>');
+    expect(out).not.toMatch(/href="javascript:/i);
+  });
 });
 
 describe('math placeholders', () => {
