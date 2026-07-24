@@ -74,37 +74,51 @@ function renderBar(cfg: ChartConfig): string {
     values = firstSeries.map(Number);
   }
   if (labels.length === 0) return `<div class="chart-error">Empty chart data</div>`;
+  // Non-numeric / missing cells (Number('hello') === NaN) must not poison the
+  // scale or emit invalid geometry — treat them as 0.
+  values = values.map((v) => (Number.isFinite(v) ? v : 0));
 
   const palette = paletteFor(cfg);
-  const yMax = cfg.yMax ?? (Math.max(...values, 0) * 1.1 || 1);
+  // The axis spans zero plus both data extremes so negative bars render below
+  // the baseline instead of collapsing to nothing.
+  const dataMax = Math.max(0, ...values);
+  const dataMin = Math.min(0, ...values);
+  const yMax = cfg.yMax ?? (dataMax === 0 ? 1 : dataMax * 1.1);
+  const yMin = dataMin === 0 ? 0 : dataMin * 1.1;
+  const yRange = yMax - yMin || 1;
+  const yForValue = (v: number) => PAD_TOP + innerH * (1 - (v - yMin) / yRange);
+  const baseline = yForValue(0);
   const barW = (innerW / labels.length) * 0.7;
   const gap = (innerW / labels.length) * 0.3;
   const yTicks = 4;
 
   const yGrid = Array.from({ length: yTicks + 1 }, (_, i) => {
     const t = i / yTicks;
-    const y = PAD_TOP + innerH * (1 - t);
-    const v = (yMax * t).toFixed(yMax >= 100 ? 0 : 1);
+    const v = yMin + yRange * t;
+    const y = yForValue(v);
     return `
       <line x1="${PAD_LEFT}" y1="${y}" x2="${W - PAD_RIGHT}" y2="${y}" stroke="var(--rule, #444)" stroke-opacity="0.3" stroke-dasharray="2,2"/>
-      <text x="${PAD_LEFT - 8}" y="${y + 4}" text-anchor="end" font-size="12" fill="var(--fg-muted, #999)">${v}</text>
+      <text x="${PAD_LEFT - 8}" y="${y + 4}" text-anchor="end" font-size="12" fill="var(--fg-muted, #999)">${v.toFixed(yRange >= 10 ? 0 : 1)}</text>
     `;
   }).join('');
+
+  // Emphasized zero baseline (only distinct from the axis when data goes negative).
+  const zeroLine = `<line x1="${PAD_LEFT}" y1="${baseline}" x2="${W - PAD_RIGHT}" y2="${baseline}" stroke="var(--rule, #444)" stroke-opacity="0.7"/>`;
 
   const bars = labels
     .map((label, i) => {
       const v = values[i] ?? 0;
-      // Clamp: a negative value would produce a negative rect height, which
-      // SVG rejects (the bar silently disappears).
-      const h = Math.max(0, (v / yMax) * innerH);
+      const yv = yForValue(v);
+      const top = Math.min(yv, baseline);
+      const h = Math.abs(baseline - yv);
       const x = PAD_LEFT + (innerW / labels.length) * i + gap / 2;
-      const y = PAD_TOP + innerH - h;
       const color = palette[i % palette.length];
+      const labelY = v >= 0 ? top - 6 : top + h + 16;
       return `
-        <rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="${color}" rx="4">
+        <rect x="${x}" y="${top}" width="${barW}" height="${h}" fill="${color}" rx="4">
           <title>${escapeHtml(label)}: ${v}</title>
         </rect>
-        <text x="${x + barW / 2}" y="${y - 6}" text-anchor="middle" font-size="13" font-weight="600" fill="var(--fg, #ddd)">${v}</text>
+        <text x="${x + barW / 2}" y="${labelY}" text-anchor="middle" font-size="13" font-weight="600" fill="var(--fg, #ddd)">${v}</text>
         <text x="${x + barW / 2}" y="${PAD_TOP + innerH + 22}" text-anchor="middle" font-size="13" fill="var(--fg-muted, #999)">${escapeHtml(label)}</text>
       `;
     })
@@ -117,6 +131,7 @@ function renderBar(cfg: ChartConfig): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;max-height:100%;">
     ${title}
     ${yGrid}
+    ${zeroLine}
     ${bars}
   </svg>`;
 }
