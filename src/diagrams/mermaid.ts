@@ -66,6 +66,10 @@ function readPalette(el: HTMLElement): Palette {
   };
 }
 
+// Distinct categorical hues for pie slices (matches the SVG chart palette).
+const PIE_PALETTE = ['#cba6f7', '#94e2d5', '#f9e2af', '#f5c2e7', '#a6e3a1', '#fab387', '#89b4fa', '#eba0ac', '#74c7ec', '#f38ba8', '#b4befe', '#f2cdcd'];
+const PIE_VARS: Record<string, string> = Object.fromEntries(PIE_PALETTE.map((c, i) => [`pie${i + 1}`, c]));
+
 // Re-initialize mermaid only when the palette actually changes (theme switch).
 let currentPaletteKey = '';
 function applyPalette(mermaid: MermaidApi, p: Palette): void {
@@ -111,6 +115,14 @@ function applyPalette(mermaid: MermaidApi, p: Palette): void {
       edgeLabelBackground: p.codeBg,
       labelBackground: p.codeBg,
       nodeTextColor: p.fg,
+      // Pie/flowchart categorical slices need distinct hues — without these,
+      // every pie slice inherits primaryColor and the chart goes monochrome.
+      ...PIE_VARS,
+      pieStrokeColor: p.bg,
+      pieOuterStrokeColor: p.rule,
+      pieTitleTextColor: p.fg,
+      pieSectionTextColor: '#11111b',
+      pieLegendTextColor: p.fg,
     },
   });
 }
